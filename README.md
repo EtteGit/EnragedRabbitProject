@@ -16,6 +16,8 @@ There are 4 components so far :
  
  The Carrot Feeder STLs and config files should be available before the end of February (2021 :p).
  
+ The (preliminary) BOM for each of those components can be found here : https://docs.google.com/spreadsheets/d/1djVxoKnByb41ifVy2JTfhXmdf9UYpnUYfhvcNyUDuLw/edit?usp=sharing.
+ 
  You like this project? You want to support me and my work, help me bring new cool stuff to the community? Well you can tip me here : https://paypal.me/romainvirot?locale.x=fr_FR.
 
 Thanks !!

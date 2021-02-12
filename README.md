@@ -4,6 +4,9 @@ Welcome to the Enraged Rabbit Project Github page!
 
 This project aims to bring multimaterial capabilities to 3D printers using a single Direct Drive toolhead, similar to what the Prusa MMU2 does. While this project is mainly dedicated to be used on Voron V2s, the main components can also be used on any 3D printer that runs Klipper.
 
+ You like this project? You want to support me and my work, help me bring new cool stuff to the community? Well you can tip me here :
+[![paypal](https://www.paypalobjects.com/en_US/FR/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=C9MG5LQSQRKN4&currency_code=EUR)
+
 There are 4 components so far : 
  - **The Carrot Feeder** : this is the main unit. The Carrot Feeder allows to use a high number of different filaments (tested up to 9 channels so far) and feed them, one at a time, into the printer toolhead.
  
@@ -23,8 +26,6 @@ There are 4 components so far :
  
  The (preliminary) BOM for each of those components can be found here : https://docs.google.com/spreadsheets/d/1djVxoKnByb41ifVy2JTfhXmdf9UYpnUYfhvcNyUDuLw/edit?usp=sharing.
  
- You like this project? You want to support me and my work, help me bring new cool stuff to the community? Well you can tip me here : https://paypal.me/romainvirot
-
 Thanks !!
 
 Ette

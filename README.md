@@ -20,9 +20,7 @@ There are 4 components so far :
  
  You'll find more informations about each of those components into their respective folders. Note that this is a work in progress !!
  
- Right now only the Carrot Warehouse and the Filament Detector for the Galileo clockwork toolhead are available.
- 
- The Carrot Feeder STLs and config files should be available before the end of February (2021 :p).
+ Only the King's Seat is yet to be released !
  
  The (preliminary) BOM for each of those components can be found here : https://docs.google.com/spreadsheets/d/1djVxoKnByb41ifVy2JTfhXmdf9UYpnUYfhvcNyUDuLw/edit?usp=sharing.
  

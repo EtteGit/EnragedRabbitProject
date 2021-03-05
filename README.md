@@ -31,19 +31,24 @@ There are 4 components so far :
 # FAQ
 ## General
 Q: In what material should this be printed with?
+
 A: The whole design assumes it's printed in ABS, so printing it in PLA or PETG may result in poor fits//tolerances. 
 
 Q: Can I use this system on another printer than a Voron V2?
+
 A: Yep, as long as your printer is running Klipper you should be good to go. Of course if you are not running an AfterBurner or Galileo Clockwork toolhead, you'll need to deisng your own filament sensor below your direct drive gears.
 
 Q: Can I use a dedicated control board?
+
 A: Of course, klipper allows you to use as many MCUs as you want. In the end you'll need to control 2 stepper motors, 1 5V servo, 1 mechanical switch, 1 optical sensor and 1 filament detector.
 
 ## Carrof Feeder
 Q: How many channels can I build on the Carrot Feeder?
+
 A: Only mechanical limitation will come from the length of the 5mm D-cut shaft that holds the Bondtech-type Gears. A 9 channel system will work (this is my own testing unit). Going higher (like 12 or 15) might be possible, but it hasn't been tested yet.
 
 Q: Is there a cutter blade on the Carrot Feeder?
+
 A: Not yet, but this is planned
 
 Thanks !!

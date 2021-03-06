@@ -7,9 +7,16 @@ This project aims to bring multimaterial capabilities to 3D printers using a sin
  You like this project? You want to support me and my work, help me bring new cool stuff to the community? Well you can tip me here :
 [![paypal](https://www.paypalobjects.com/en_US/FR/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=C9MG5LQSQRKN4&currency_code=EUR)
 
-Showroom : 
+### Showroom : 
 
 <img src="https://cdn.discordapp.com/attachments/603294954382426133/811963167168266270/20210218_150835.jpg" alt="Carrot Feeder" width="340"/><img src="https://cdn.discordapp.com/attachments/603294954382426133/812222776512348200/20210219_081627.jpg" alt="Carrot Feeder" width="600"/>
+
+### Videos of the system in action :
+https://streamable.com/3lo192
+
+https://streamable.com/cjl2iz
+
+### Details :
 
 There are 4 components so far : 
  - **The Carrot Feeder** : this is the main unit. The Carrot Feeder allows to use a high number of different filaments (tested up to 9 channels so far) and feed them, one at a time, into the printer toolhead. The Carrot Feeder gear motion system (i.e. what is used to push and pull the filament) uses part of the Voron Design M4 extruder (namely the whole 80T wheel and part of the motor support//tensionning system).

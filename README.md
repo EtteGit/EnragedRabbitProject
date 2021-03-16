@@ -49,7 +49,7 @@ There are 4 components so far :
 **A:** Of course, klipper allows you to use as many MCUs as you want. In the end you'll need to control 2 stepper motors, 1 5V servo, 1 mechanical switch, 1 optical sensor and 1 filament detector.
 
 
-## Carrof Feeder
+## Carrot Feeder
 **Q:** How many channels can I build on the Carrot Feeder?  
 **A:** Only mechanical limitation will come from the length of the 5mm D-cut shaft that holds the Bondtech-type Gears. A 9 channel system will work (this is my own testing unit). Going higher (like 12 or 15) might be possible, but it hasn't been tested yet.
 

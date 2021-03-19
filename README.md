@@ -35,6 +35,10 @@ There are 4 components so far :
  
  The BOM for those components can be found here : https://docs.google.com/spreadsheets/d/1djVxoKnByb41ifVy2JTfhXmdf9UYpnUYfhvcNyUDuLw/edit?usp=sharing.
  
+# Acknowledgement
+
+Thanks to the Voron design devs and Voron discord members for the discussions and support, with a special thanks to the #honhonhonbaguette-FR members!!
+ 
 # FAQ
 ## General
 **Q:** In what material should this be printed with?  

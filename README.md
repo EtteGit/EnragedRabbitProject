@@ -2,7 +2,7 @@
 
 Welcome to the Enraged Rabbit Project Github page!
 
-This project aims to bring multimaterial capabilities to 3D printers using a single Direct Drive toolhead, similar to what the Prusa MMU2 does. While this project is mainly dedicated to be used on Voron V2s, the main components can also be used on any 3D printer that runs Klipper.
+This project aims to bring multimaterial capabilities to 3D printers using a single Direct Drive toolhead, similar to what the Prusa MMU2 does. While this project is mainly dedicated to be used on Voron V2s, the main components can also be used on any 3D printer that runs Klipper. It was inspired by the Prusa MMU2 and the Smuff.
 
  You like this project? You want to support me and my work, help me bring new cool stuff to the community? Well you can tip me here :
 [![paypal](https://www.paypalobjects.com/en_US/FR/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=C9MG5LQSQRKN4&currency_code=EUR)

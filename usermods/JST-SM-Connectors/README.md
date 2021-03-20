@@ -5,5 +5,5 @@ Furthermore for getting the cables through the skirt into the printer the "Rabbi
 
 ![SkirtFront](front.png)
 ![SkirtBack](back.png)
-
+![example](JST-example.png)
 

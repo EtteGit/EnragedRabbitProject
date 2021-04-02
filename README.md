@@ -9,7 +9,7 @@ This project aims to bring multimaterial capabilities to 3D printers using a sin
 
 ### Showroom : 
 
-<img src="https://cdn.discordapp.com/attachments/603294954382426133/811963167168266270/20210218_150835.jpg" alt="Carrot Feeder" width="340"/><img src="https://cdn.discordapp.com/attachments/603294954382426133/812222776512348200/20210219_081627.jpg" alt="Carrot Feeder" width="600"/>
+<img src="https://cdn.discordapp.com/attachments/708863940171661364/827565237246099476/20210402_172158.jpg" alt="Carrot Feeder test" width="340"/><img src="https://cdn.discordapp.com/attachments/603294954382426133/811963167168266270/20210218_150835.jpg" alt="Carrot Feeder" width="340"/><img src="https://cdn.discordapp.com/attachments/603294954382426133/812222776512348200/20210219_081627.jpg" alt="Carrot Feeder" width="600"/>
 
 ### Videos of the system in action :
 https://streamable.com/3lo192

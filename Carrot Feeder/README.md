@@ -12,4 +12,4 @@ The 'dome overhang' on the M4_Gear_Arm is an extreme torture test for the overha
 You can use any number of Bearing_Block in your system, and wherever you want in-between your Filament_Blocks. Though the bar lengths from the BOM are calculated assuming you are using one Bearing_Block (of 5mm width) per 3 Filament_Block, starting from 3 blocks (i.e. 0 Bearing_Block for 1 to 3 channels system, 1 Bearing_Block for 4 to 6 channels systems etc.).
 
 # Assembly
-A pdf for the assembly will be released soon, as well a videos to show you a full build//installation and calibration, just be patient!
+Follow the pdf located in this folder.

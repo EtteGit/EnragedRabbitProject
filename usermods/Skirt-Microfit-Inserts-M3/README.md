@@ -12,5 +12,7 @@ Tweaks:
 4. Secure with an M3 button head (ISO7380) screw (6-16 mm long) threaded into
     the plastic plastic.
 
+**Filament swap** at 1mm height for contrast as below:
+
 ![](img/inserts.jpg)
 ![](img/bolt_retainer.jpg)

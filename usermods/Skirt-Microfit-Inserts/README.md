@@ -1,8 +1,26 @@
-# Skirt inserts for Micro-Fit connectors
+ An iteration on dvorak74's Micro-Fit inserts, based around meteyou's
+ fantastic [G-code button mod](https://github.com/VoronDesign/VoronUsers/tree/master/legacy_printers/printer_mods/meteyou/gcode_buttons).Thanks to you both!
 
-This is intended to be an alternative to the official part that adds the Micro-Fit connectors to the power outlet.  This mod consists of two insert that fit into a normal Voron V2 skirt.  The Micro-Fit connectors slide in from the back of the insert just like they do on the ERCF itself.  You'll want to print two of the lock rings and slide those over the inserts from the inside of the skirt.  The fit of the Micro-Fit connectors into the skirt inserts should be the roughly the same as it is on the ERCF itself, since the dimensions are based on that.
+Tweaks from dvorak74's inserts:
+-   Receptical housing sits deeper, does not protrude.
+-   Securely retained by lip on the rear receptacle housing and an M3 bolt
+-   Luchador flair
 
-This mod is inspired by and heavily based on meteyou's [Gcode button mod](https://github.com/VoronDesign/VoronUsers/tree/master/legacy_printers/printer_mods/meteyou/gcode_buttons).
+## Printing:
+1x `5-pin_microfit_skirt_insert.stl` or `_luchador` version
 
-![Photo](installed.png)
-![Cad render](cad.png)
+1x `2x4-pin_microfit_skirt_insert.stl`
+
+2x `lock_x2.stl`
+
+Filament swap at 1mm height for contrast as images below.
+
+## Assembly
+1. Slot the insert in through the outside face of a skirt hexagon.
+2. Secure the insert with a lock ring on the back face.
+3. Slide Molex Micro-Fit 3.0 housing(s) through the back side of the inserts.
+4. Secure with an M3 button head (ISO7380) screw (6-16 mm long) threaded into
+    the plastic plastic.
+
+![](img/inserts.jpg)
+![](img/bolt_retainer.jpg)

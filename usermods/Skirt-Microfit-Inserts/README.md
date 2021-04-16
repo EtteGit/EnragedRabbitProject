@@ -2,7 +2,7 @@
  fantastic [G-code button mod](https://github.com/VoronDesign/VoronUsers/tree/master/legacy_printers/printer_mods/meteyou/gcode_buttons).Thanks to you both!
 
 Tweaks from dvorak74's inserts:
--   Receptical housing sits deeper, does not protrude.
+-   Receptacle housing sits deeper, does not protrude.
 -   Securely retained by lip on the rear receptacle housing and an M3 bolt
 -   Luchador flair
 

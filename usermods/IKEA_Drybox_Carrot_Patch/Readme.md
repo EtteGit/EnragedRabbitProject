@@ -6,6 +6,7 @@
 - [Bowden Fitting](https://de.aliexpress.com/item/32934148155.html) $1.14
 - [Bowden Clip](https://de.aliexpress.com/item/32892392365.html) $0.33
 - [8pcs 6x3 rounded Neodym Magnets](https://de.aliexpress.com/item/1005001614008679.html) $2.51  50pcs
+- [~150g Silica gel](https://de.aliexpress.com/item/4000144970813.html) $11 (locally waaaay cheaper)
 - optional: [Humidity Meter](https://de.aliexpress.com/item/1005002050395803.html) $0.97
 - optional: [40mm drill](https://de.aliexpress.com/item/4000866533733.html) $3.37
 

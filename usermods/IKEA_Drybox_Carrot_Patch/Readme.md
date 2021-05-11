@@ -6,6 +6,10 @@
 - [Bowden Fitting](https://de.aliexpress.com/item/32934148155.html) $1.14
 - [Bowden Clip](https://de.aliexpress.com/item/32892392365.html) $0.33
 - [8pcs 6x3 rounded Neodym Magnets](https://de.aliexpress.com/item/1005001614008679.html) $2.51  50pcs
+- optional: [Humidity Meter](https://de.aliexpress.com/item/1005002050395803.html) $0.97
+- optional: [40mm drill](https://de.aliexpress.com/item/4000866533733.html) $3.37
+
+** optional: drill a hole in the front for a humidity meter
 
 ## Modified Parts
 - [a]_Sliding_Arm.stl --> [a]_Sliding_Arm_Drybox.stl

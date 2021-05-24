@@ -5,3 +5,5 @@ This mod, inspired from the closed exhaust plate from @Elpopo (see here : https:
 It's designed as a multicolor print.
 
 You can edit your V2 serial number in the f3d file (or on the .step if you don't have Fusion360). Use adhesive foam on the inner groove to ensure proper V2 chamber sealing, and use the regular inner front plate of the V2 to fix this mod.
+
+![Closed Exhaust Plate](Images/Closed_Exhaust_Plate_mod.png)

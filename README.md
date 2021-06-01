@@ -20,7 +20,7 @@ This project aims to bring multimaterial capabilities to 3D printers using a sin
 
 ## Showroom
 
-<img src="https://cdn.discordapp.com/attachments/708863940171661364/827565237246099476/20210402_172158.jpg" alt="Carrot Feeder test" width="340"/><img src="https://cdn.discordapp.com/attachments/603294954382426133/811963167168266270/20210218_150835.jpg" alt="Carrot Feeder" width="340"/><img src="https://cdn.discordapp.com/attachments/603294954382426133/812222776512348200/20210219_081627.jpg" alt="Carrot Feeder" width="600"/>
+<img src="Showroom/Benders.png" alt="Benders" width="950"/><img src=Showroom/Bimaterial_logo.png alt="Voron Logo TPU" width="650"/><img src=Showroom/5_colors_test.png alt="5_colors_test" width="300"/><img src=Showroom/9_colors_test.png alt="9_colors_test" width="400"/><img src="Showroom/Gustav_brothers.png" alt="Gustav brothers" width="550"/>
 
 ## Videos
 Here are videos of the system in action. More will come.

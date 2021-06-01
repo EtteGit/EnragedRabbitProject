@@ -62,6 +62,10 @@ Thanks to the Voron design devs and Voron discord members for the discussions an
 **A:** The whole design assumes it's printed in ABS, so printing it in PLA or PETG may result in poor fits//tolerances.
 
 
+**Q:** What materials can be printed with the Enraged Rabbit?  
+**A:** So far, PLA, PETG, ABS and TPU were all tested with success. For TPU, both 95A and 30D (~80A) were tested and could be loaded//unloaded using the Enraged Rabbit Carrot Feeder. While the 95A TPU was also working well with the Carrot Patch spool holder + buffer combo, the 30D TPU is way too soft to make filament "loops". If you plan to use such ultra-soft TPU, make sure the concerned Carrot Patch is located in a "clean" area (to avoid your TPU buffer length to be caught on something) or use another buffer//spool holder.
+
+
 **Q:** Can I use this system on another printer than a Voron V2?  
 **A:** Yep, as long as your printer is running Klipper you should be good to go. Of course if you are not running an AfterBurner or Galileo Clockwork toolhead, you'll need to deisng your own filament sensor below your direct drive gears.
 
@@ -76,7 +80,7 @@ Thanks to the Voron design devs and Voron discord members for the discussions an
 
 
 **Q:** Is there a cutter blade on the Carrot Feeder?  
-**A:** No, and it's not on the schedule (anymore). It seems, so far, not a needed feature.
+**A:** No, and it's not on the schedule (anymore). It seems to be, so far, not a needed feature.
 
 
 Thanks !!

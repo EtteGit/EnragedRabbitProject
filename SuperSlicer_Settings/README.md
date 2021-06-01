@@ -2,6 +2,8 @@
 
 I'm using SuperSlicer (https://github.com/supermerill/SuperSlicer) with my ERCF.
 
+Here is a collaborative, open table to share [proper purging volumes](https://docs.google.com/spreadsheets/d/11onBwd85u0-9houRi6wMT2FBWrvbKk8fzwE3qLjkN1w/edit?usp=sharing). Please respect the table layout and don't delete//edit other people's inputs :) .
+
 Here are my SuperSlicer settings related to the multimaterial :
 
 ## Printer Settings

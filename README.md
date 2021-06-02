@@ -8,6 +8,7 @@ This project aims to bring multimaterial capabilities to 3D printers using a sin
 [![paypal](https://www.paypalobjects.com/en_US/FR/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=C9MG5LQSQRKN4&currency_code=EUR)
 
 ## Table of Content
+- [Changelog](#changelog)
 - [Showroom](#showroom)
 - [Videos](#videos)
 - [Details](#details)
@@ -17,6 +18,16 @@ This project aims to bring multimaterial capabilities to 3D printers using a sin
   - [General](#general)
   - [Carrot Feeder](#carrot-feeder)
  
+## Changelog
+- June 2nd 2021 : Release of Carrot Patch V1.1
+   - Increased handles section near the threaded insert for more robustness
+   - Removed useless chamfer on feet bottom screw holes and increased hole depth (one can now properly use M3X8 SHCS to secure the Carrot Patch on 2020 extrusions)
+   - Fixed several parts lengths//size that impacted the buffer wheel installation. Now the wheel should slightly touch both side walls (to avoid any possible gaps) while being able to turn (but not freely, which is on purpose)
+   - Buffer Cross bottom arm is now secured using a M3X20 SHCS screw that comes from the bottom (that is also securing the left feet of the Carrot Patch)
+   - Buffer Cross ECAS insert has been tuned, reinforced and a "bridge" shape has been added. Inserting the ECAS will no longer crack the plastic
+   - Increased the size of the Buffer Cross "pillar" that sits between the two PTFE paths (some users previously reported fragilities due to the lack of matter for this pillar)
+   - Updated the assembly manual and the CAD accordingly
+   - Only parts that did not change are : [a]_Buffer_Wheel, [a]_Latch, [a]_Sliding_Arm, Buffer_Axis, Ptfe_Entry_ECAS and Ptfe_Entry_M10
 
 ## Showroom
 
@@ -44,7 +55,7 @@ There are 4 components so far :
    - Galileo Clockwork toolhead
    - LGX on AfterBurner (AB) toolhead
 You'll find those either on the main project folder or in the usermods folders.
- 
+  
  You'll find more informations about each of those components into their respective folders. Note that this is a work in progress !!
  
  Only the King's Seat is yet to be released !

@@ -16,6 +16,7 @@ This project aims to bring multimaterial capabilities to 3D printers using a sin
 - [Acknowledgements](#acknowledgements)
 - [FAQ](#faq)
   - [General](#general)
+  - [Carrot Patch](#carrot-patch)
   - [Carrot Feeder](#carrot-feeder)
  
 ## Changelog
@@ -84,6 +85,18 @@ Thanks to the Voron design devs and Voron discord members for the discussions an
 **Q:** Can I use a dedicated control board?  
 **A:** Of course, klipper allows you to use as many MCUs as you want. In the end you'll need to control 2 stepper motors, 1 5V servo, 1 mechanical switch, 1 optical sensor and 1 filament detector. A dedicated PCB will be designed, at some point (no ETA at all).
 
+
+### Carrot Patch
+**Q:** How does this work?
+**A:** The spool holding part is a direct copy of the nominal spool holder on Vorons, i.e. an arm with a 4mm PTFE tube on which the spool rests and turns around. The buffer part of the Carrot Patch, which is inspired from several similar open-source designs, consists of a big wheel located in a filament "cage". Filament from the spool enters the filament cage, makes a few turns around the wheel and then exit the cage through a PTFE tube. When the extruder pull filament during a print, the filament will encircle the buffer wheel, which will simply turn to go along with the extruder pulling. When there is a retract // unload, the filament will be pushed back in the filament cage, making big loops (as much as the cage allows, so roughly 15 cm diameter), storing the filament buffer length in the cage. More filament turns around the wheel implies a longer buffer length. Use 4 turns form a buffer of around 120 cm. 
+
+
+**Q:** Why not use a spool rewinder instead of a buffer?
+**A:** Usual rewinders are using either a sprint or a counterweight of some sort (nuts, bearing, spool itself...). The result is that it will rewind a certain number of spool turn, not a defined filament length (an almost empty spool will have a very small rewinding capabiliy). Also Vorons V2 are big printers and the reverse bowden is quite long (around 80cm), meaning that typical rewinding solutions are not enough anyway. On the other hand, a buffer like the one on the Carrot Patch can handle very long filament buffer length.
+
+
+**Q:** The buffer wheel recess on the buffer cross has a smaller diamater than the buffer wheel itself, is this normal?
+**A:** Yes. Goal of this recess is just to reduce the total contact surface between the wheel and the buffer cross "wall", while conserving a direct contact at the edge of the wheel.
 
 ### Carrot Feeder
 **Q:** How many channels can I build on the Carrot Feeder?  

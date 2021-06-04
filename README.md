@@ -20,6 +20,7 @@ This project aims to bring multimaterial capabilities to 3D printers using a sin
   - [Carrot Feeder](#carrot-feeder)
  
 ## Changelog
+- June 4th 2021 : TopHatLockers and related (servo arm, TopGearHat, macros) have been released to the main branch, from the EarlyDevAccess branch. If you're already running EarlyDevAccess stuff, that won't change anything for you
 - June 2nd 2021 : Release of Carrot Patch V1.1
    - Increased handles section near the threaded insert for more robustness
    - Removed useless chamfer on feet bottom screw holes and increased hole depth (one can now properly use M3X8 SHCS to secure the Carrot Patch on 2020 extrusions)

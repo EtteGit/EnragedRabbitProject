@@ -1,4 +1,7 @@
-# The "Poor man's SmartWatch"
+# The "Poor man's SmartWatch" - OLD REVISION
+
+**A NEW VERSION IS AVAILABLE, IT'S RECOMMENDED TO PRINT THAT**
+
 This is my take on making the standard AB clockwork "smart" by inserting filament sensors in the toolhead.
 The goal was to keep the BOM to a very bare minimum, using just a common microswitch and a 7mm steel ball, so that every penny saved here can be spent in moar modifications to our dear machines.
 

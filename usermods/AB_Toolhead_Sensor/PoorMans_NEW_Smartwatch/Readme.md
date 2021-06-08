@@ -28,4 +28,4 @@ NO wiring is easier to fit.
 - Finish the clockwork assembly following the original manual, wire the switch to an available slot on the SKR and you're good to go.
 
 ## Notes
-Thanks to *kageurufu* for his work on the ECAS fitting.
+Kudos to *kageurufu* for his work on the ECAS fitting, and to *Alch3my* and *Th3FalleN* for the pivoting switch idea.

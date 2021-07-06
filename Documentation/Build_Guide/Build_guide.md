@@ -234,7 +234,7 @@ While not necessary it is highly recommended that you are starting with a good w
 
 ![MM](./Images/image6.png))
 
-- Cooling tube position is the distance from the nozzle to middle of the PTFE tube from the extruder to the hotend.(see Useful diagram section for diagram of common measurements)** 
+- Cooling tube position is the distance from the nozzle to middle of the PTFE tube from the extruder to the hotend.(see Useful diagram section for diagram of common measurements)
 - Starting values below can be used. But may need to be adjusted for your system. 
 
 	![measurement](./Images/image3.png)

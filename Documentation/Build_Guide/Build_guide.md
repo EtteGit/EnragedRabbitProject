@@ -1,4 +1,5 @@
 
+
 # The print
 
 If you have printed a voron this is the familiar part. Use standard Voron print settings (listed below.) All files are available online[ ERCF](https://github.com/EtteGit/EnragedRabbitProject). The BOM can be found[ here](https://docs.google.com/spreadsheets/d/1djVxoKnByb41ifVy2JTfhXmdf9UYpnUYfhvcNyUDuLw/edit#gid=0).  
@@ -42,29 +43,25 @@ These files will have nothing at the start of the filename.
 After the prints you need to build the 3 current components of the ERCF system.
 
 **The Carrot Feeder**: 
-
 This is the main unit. The Carrot Feeder allows the use of a high number of different filaments (tested up to 9 channels so far) and feed them, one at a time, into the printer tool head. The Carrot Feeder gear motion system (i.e. what is used to push and pull the filament) uses part of the Voron Design M4 extruder (namely the whole 80T wheel and part of the motor support//tensioning system) Build guide located[ here](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Carrot_Feeder/CarrotFeederAssemblyAndSetup.pdf).
 
  **The Carrot Patch**:
-
-a spool-holder and buffer combo to help you deal with the filament management issue associated with multi-material systems.
+A spool-holder and buffer combo to help you deal with the filament management issue associated with multi-material systems.
 Build guide located[ here](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Carrot_Patch/CarrotPatchAssembly.pdf).
 
 **The filament sensor**:
-Special note these are all essentially user mods. With that being the case the BOM for the rabbit does not cover the parts for these mods. Please refer to each one for the required components.
+There are many versions of the toolhead sensor. While the nominal one is for the Galileo Clockwork, many others are available in the usermod folder. With that in mind, the BOM for the Enraged Rabbit Carrot Feeder does not cover the parts for these toolhead sensors. Please refer to each one for the required components.
 
-A filament sensor system located below the gears of the tool head, to check proper loading//unloading of filament. There are versions available for :
+A filament sensor system located below the gears of the toolhead, to check proper loading//unloading of filament. There are versions available for :
 
- Regular AfterBurner [ (AB) Toolhead](https://github.com/EtteGit/EnragedRabbitProject/tree/main/usermods/AB_Toolhead_Sensor)
+ **Regular AfterBurner** [ (AB) Toolhead](https://github.com/EtteGit/EnragedRabbitProject/tree/main/usermods/AB_Toolhead_Sensor)
  
      
- Galileo Clockwork:
- 
- [ Optical Version](https://github.com/EtteGit/EnragedRabbitProject/tree/main/Filament_Detector) – Sensor I used from amazon[ here](https://www.amazon.com/gp/product/B07PYQWGK1/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1)
- 
- [ Microswitch Version](https://discord.com/channels/460117602945990666/708863940171661364/839634846510612530)
+ **Galileo Clockwork**
+  - [ Optical Version](https://github.com/EtteGit/EnragedRabbitProject/tree/main/Filament_Detector) – Sensor can be found for example on amazon[ here](https://www.amazon.com/gp/product/B07PYQWGK1/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1)
+ -  [ Microswitch Version](https://discord.com/channels/460117602945990666/708863940171661364/839634846510612530)
      
-LGX on AfterBurner (AB) tool head you’ll find those either on the main project folder or in the usermods folders. -[ here](https://github.com/EtteGit/EnragedRabbitProject/tree/main/usermods/LGX_Toolhead_Sensor)
+**LGX on AfterBurner (AB)** tool head you’ll find those either on the main project folder or in the usermods folders. -[ here](https://github.com/EtteGit/EnragedRabbitProject/tree/main/usermods/LGX_Toolhead_Sensor)
 
 New tools and mods can be viewed under[ usermods](https://github.com/EtteGit/EnragedRabbitProject/tree/main/usermods/LGX_Toolhead_Sensor).
 
@@ -77,25 +74,24 @@ New tools and mods can be viewed under[ usermods](https://github.com/EtteGit/Enr
 1. Add a call to printer.cfg for the macros and hardware configuration. [ Example here](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Klipper_Macros/printer.cfg). This is added to the existing printer.cfg. It does not replace it.
 
 
-2. Download ercf_hardware.cfg and ercf_macros.cfg upload to your configuration folder (see fluid example below). They can be downloaded from[ here](https://github.com/EtteGit/EnragedRabbitProject/tree/main/Klipper_Macros).
+2. Download ercf_hardware.cfg and ercf_macros.cfg upload to your configuration folder (see fluidd example below). They can be downloaded from[ here](https://github.com/EtteGit/EnragedRabbitProject/tree/main/Klipper_Macros).
 
 	![Configuration_files](./Images/image10.png)
 
-3. Under the extruder Add or modify the max_extrude_only_distance: 200
+3. Under the extruder add or modify the max_extrude_only_distance: 200
 
 	![Max_Extrude](./Images/image13.png)
-4. Open ercf_macros.cfg search for HOME_ERCF. And replace them with ERCF_HOME. To be fixed soon.
 
-# First movement and checks.  
+# First movement and checks  
 
-1. Check end stops are working and triggering correctly. Manual_stepper selector_stepper is the endstop that is bumped by the cart. Ensure that it is open and not triggered.
+1. Check endstops are working and triggering correctly. Manual_stepper selector_stepper is the endstop that is bumped by the cart. Ensure that it is open and not triggered.
 
 	![End_Stops](./Images/image9.png)
 
 
-2. Check end stops are working and triggering correctly. Manual_stepper gear_stepper is the optical endstop in the cart. It should have a red glow when not triggered and off when triggered. You can use a piece of filament pushed in to trigger it. If you see the light but it does not go off. Please refer to the[ carrot feeder assembly guide section 13-b](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Carrot_Feeder/CarrotFeederAssemblyAndSetup.pdf) for calibration of the optical sensor spacing. 
+2. Manual_stepper gear_stepper is the optical endstop in the cart. It should have a red glow when filament is detected, and no light when there is no filament. You can use a piece of filament pushed in to trigger it and check. If the sensor behaves differently than expected please refer to the[ carrot feeder assembly guide section 13-b](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Carrot_Feeder/CarrotFeederAssemblyAndSetup.pdf) for calibration of the optical sensor spacing. 
 
-3. Ensure the Runout sensor in the toolhead is working.
+3. Ensure the filament sensor in the toolhead is working.
 
 	Without filament loaded in Fluidd
 
@@ -105,12 +101,12 @@ New tools and mods can be viewed under[ usermods](https://github.com/EtteGit/Enr
 
 	![Runout](./Images/image16.png "image_tooltip")
 
-4. Servo test to ensure the servo moves and is in the proper location. Refer to carrot feeder assembly section 13-a[ here](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Carrot_Feeder/CarrotFeederAssemblyAndSetup.pdf) for location.  
+4. Test the servo to ensure it moves and is in the proper location. Refer to carrot feeder assembly section 13-a[ here](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Carrot_Feeder/CarrotFeederAssemblyAndSetup.pdf) for location.  
 
 - Use SERVO_UP
 - Use SERVO_DOWN
 
-5. If the servo arm does not move to the correct angle. You can use SERVO_TEST VALUE=XXX. Once you have the correct angle for your servo. Modify the angles for each in your ercf_macros.cfg and save and restart.
+5. If the servo arm does not move to the correct angle, use SERVO_TEST VALUE=XXX. Once you have the correct angle for your servo, modify the angles for each in your ercf_macros.cfg, then save and restart.
 
 6. Use STEPPER_BUZZ STEPPER="manual_stepper gear_stepper" to test that the gears turn.
 
@@ -118,10 +114,10 @@ New tools and mods can be viewed under[ usermods](https://github.com/EtteGit/Enr
 7. Use STEPPER_BUZZ STEPPER=" manual_stepper selector_stepper" to test that the selector motor moves.
 
 
-8. Use ERCF_HOME check that the carriage moves in the direction of the endstop and the gear moves in the load direction. (be ready to stop it if the carriage moves the wrong direction) Add or remove the (!) on the direction pin as needed to change the direction.
+8. Use ERCF_HOME to check that the carriage moves in the direction of the endstop and the gear moves in the load direction (be ready to stop it if the carriage moves in the wrong direction). Add or remove the (!) on the direction pin as needed to change the direction.
 
 
-## Tool head variables
+## Toolhead variables
 
 ### variable_sensor_to_nozzle:XX
 
@@ -139,7 +135,7 @@ Length from the sensor to the nozzle melting pool
 
 Distance between the end of the reverse bowden and the toolhead sensor. Value is toolhead specific
 	
-1. Feed filament into the toolhead until the tool head sensor triggers. 
+1. Feed filament into the toolhead until the toolhead sensor triggers. 
 
 	![Runout](./Images/image16.png)
 
@@ -156,33 +152,32 @@ Distance between the end of the reverse bowden and the toolhead sensor. Value is
 
 # Calibration/Setup
 
-## Loading patches/Determine buffer need.
+## Loading patches/Determine buffer need
 
-In general you need enough buffer to support filament rewind from the tool head back to the carrot feeder. Plus an additional 10 cm. This will be determined by the length of the Bowden from the carrot feeder to the head and the placement of the feeder. In testing you need a loop on the wheel for every 30cm of filament.
+In general you need enough buffer to support filament rewind from the toolhead back to the carrot feeder. Plus an additional 10 cm. This will be determined by the length of the reverse bowden (from the carrot feeder to the toolhead) and the placement of the feeder. In practice you need a loop on the buffer wheel for every 30cm of filament.
 
-**(Bowden length in cm + 10cm)/30= (Loops needed rounded up to next full number)**
+**(Bowden length in cm + 10cm)/30 = (Loops needed rounded up to next full number)**
 
  
 ## Rotation distance
 
  Just like a standard extruder you need to tune the step distance.
 
+ 1. . ercf_home
 
-1.Feed some filament into the first channel without PTFE tube on it. At least 120 mm worth
+2.  select_tool Value=0
 
-2. ercf_home
+3. LOAD_FILAMENT_TO_ERCF
 
-3. select_tool Value=0
+4. Unplug the ptfe tube at the ERCF selector exit and cut flush the filament at the ECAS output (use the ECAS as the reference for the cut)
 
-4. Measure from the ecas out 120 mm on the filament and mark the filament with a marker
+5. MOVE_GEAR_REL VALUE=100 this will extrude 100mm (pre_calibration, so the real value can be different) worth of filament
 
-5. Use “MANUAL_STEPPER STEPPER=gear_stepper SET_POSTION=0” To 0 the current location.
+6. Cut flush again, at the ECAS, the chunk of filament that has been pushed by the previous command
 
-6. Use “MANUAL_STEPPER STEPPER=gear_stepper MOVE=100”
+7. Measure the length of the filament you just cut
 
-7. Measure the distance from the ecas to the mark.
-
-8. (Current step_distance x 100)/(120 - remaining measurement)= New Step_distance
+8. (Current step_distance x 100)/(measured length in mm)= New Step_distance
 
 9. Modify gear stepper step distance in ercf_hardware.cfg and save and restart.
 
@@ -217,7 +212,7 @@ In general you need enough buffer to support filament rewind from the tool head 
 
 7. Final check: use “Change_tool_standalone tool=0”, then do “Change_tool_standalone tool=1” ensure that the filament loads correctly then unloads and loads the second channel.
 
-**Notes: If you see a pause that means something did not complete correctly**
+**Notes: If a pause is triggered by the ERCF, that means something did not complete correctly**
 
 
 
@@ -226,7 +221,7 @@ In general you need enough buffer to support filament rewind from the tool head 
 
 While not necessary it is highly recommended that you are starting with a good working profile for your printer to begin with.
 
-1. Open the printer profile that you want to use multi-material printing with in super slicer/prusa slicer. Select the Printer settings tab. And highlight general in the left side column. You need to have settings set to expert in the top right corner. Set the # of extruders to the the # of channels that you have built into your ERCF.  And check the box for a single extruder. 
+1. Open the printer profile that you want to use multi-material printing with in super slicer/prusa slicer. Select the Printer settings tab and highlight general in the left side column. You need to have settings set to expert in the top right corner. Set the # of extruders to the the # of channels that you have built into your ERCF, and check the box for a single extruder. 
 
 ![extruders](./Images/image12.png)
 
@@ -254,10 +249,8 @@ While not necessary it is highly recommended that you are starting with a good w
 
 ## FAQ/common issues 
 
-- On a failure during a print if you clear the error/jam/issue. You can look at the console for "change tool tX" to determine what filament should be loaded before resuming the print.
-- Filament sensor arm in the cart will wear down with the current iteration. If you have issues with it starting to not retract enough filament or homing starts to fail consistently. Check if it can be tuned on the 2 bottom screws if not replace it. 
-- In some versions of the ERCF_MACRO.cfg there are references to HOME_ERCF. This is an incorrectly formatted reference.  Use  find and replace of any references and change to ERCF_HOME. 
-
+- On a pause during a print (i.e. user intervention is required), you need to clear the error/jam/issue. You can look at the console for "change tool tX" to determine what filament should be loaded before resuming the print. Don't forget to start the intervention by calling the ERCF_UNLOCK macro.
+- Filament sensor arm in the cart will wear down with the current iteration. If you have issues with it starting to not retract enough filament or homing starts to fail consistently, check if it can be tuned on the 2 bottom screws if not replace it. 
 
 # Useful diagrams and measurements
 
@@ -280,7 +273,7 @@ While not necessary it is highly recommended that you are starting with a good w
 
 “SERVO_DOWN” Moves servo to the “variable_servo_down_angle: 82” value set in the ercf_macros.cfg file. 
 
-“ SERVO_TEST VALUE=145” Used to test the angle of the servo to fine tune the pressure on the filament blocks.  
+“ SERVO_TEST VALUE=145” Used to test the angle of the servo to determine the proper servo arm angles.  
 
 “STEPPER_BUZZ STEPPER="manual_stepper gear_stepper"” Used to test the stepper movement prior to use. 
 
@@ -290,28 +283,22 @@ While not necessary it is highly recommended that you are starting with a good w
 
 “MANUAL_STEPPER STEPPER=gear_stepper MOVE=100” Used to feed a specific amount of filament for testing. 
 
+"MOVE_GEAR_REL VALUE=xxx" make a relative move of the gear motor, by xxx mm. This macro combines the 2 previous macros in a single command.
+
 ## Calibration commands 
 
-“ERCF_CALIBRATE_ALL” Starts a calibration of all channels. Must home ERCF prior to use.
+“ERCF_CALIBRATE_ALL” Starts a calibration of all channels.
 
-“ERCF_CALIBRATE_SINGLE channel=0” Starts a calibration of a single channel. Must home ERCF prior to use. 
+“ERCF_CALIBRATE_SINGLE channel=0” Starts a calibration of a single channel.
 
  
 
 ## General use commands
 
-“ERCF_HOME” Attempts to unload any filament in ERCF or the tool head. And homes the selector location. Then loads and unloads channel 0. Useful for unloading and preparing the ERCF for use. 
+“ERCF_HOME” Attempts to unload any filament in ERCF or the toolhead and homes the selector location. Then loads and unloads channel 0. Useful for unloading and preparing the ERCF for use. 
 
-“ERCF_UNLOCK” in the case of a failure in most cases it will move the tool head to a parking position and pause any print or actions. This is used to reset the ERCF to prepare for a homing or will move the servo to an unlocked position to unload any stuck filament. 
+“ERCF_UNLOCK” in the case of an ERCF pause (i.e. user intervention required) the toolhead will be moved at the parking position and the printer paused. When you start the manual intervention, always start by calling this macro : this will (re)allow usage of ERCF macros and, if need be, re-heat the hotend to it's temperature before the pause triggered.
 
 “select_tool Value=0” Sets the tool that is currently in use. Change “0” to the channel you wish to select.  
 
-“Change_tool_standalone tool=0” Used to load filament for a specific channel. Useful for printing using the slicer without running it in multifilament mode. Change “0” to the channel you wish to select. Will unload any currently loaded filament. 
-
- 
-
- 
-
- 
-
- 
+“Change_tool_standalone tool=0” Used to load filament for a specific channel outside of a print. Useful for printing in single filament mode. Change “0” to the channel you wish to select. Will unload any currently loaded filament. 

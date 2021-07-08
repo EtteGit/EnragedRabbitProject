@@ -111,7 +111,7 @@ New tools and mods can be viewed under[ usermods](https://github.com/EtteGit/Enr
 6. Use STEPPER_BUZZ STEPPER="manual_stepper gear_stepper" to test that the gears turn.
 
 
-7. Use STEPPER_BUZZ STEPPER=" manual_stepper selector_stepper" to test that the selector motor moves.
+7. Use STEPPER_BUZZ STEPPER="manual_stepper selector_stepper" to test that the selector motor moves.
 
 
 8. Use ERCF_HOME to check that the carriage moves in the direction of the endstop and the gear moves in the load direction (be ready to stop it if the carriage moves in the wrong direction). Add or remove the (!) on the direction pin as needed to change the direction.

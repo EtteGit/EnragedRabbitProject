@@ -163,9 +163,9 @@ In general you need enough buffer to support filament rewind from the toolhead b
 
  Just like a standard extruder you need to tune the step distance.
 
- 1. . ercf_home
+1. ERCF_HOME
 
-2.  select_tool Value=0
+2. SELECT_TOOL VALUE=0
 
 3. LOAD_FILAMENT_TO_ERCF
 
@@ -177,7 +177,7 @@ In general you need enough buffer to support filament rewind from the toolhead b
 
 7. Measure the length of the filament you just cut
 
-8. (Current step_distance x 100)/(measured length in mm)= New Step_distance
+8. (Current rotation_distance x 100)/(measured length in mm)= New rotation_distance
 
 9. Modify gear stepper step distance in ercf_hardware.cfg and save and restart.
 

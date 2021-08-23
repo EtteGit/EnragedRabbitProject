@@ -20,3 +20,4 @@ like so:
  | fsironman | [JST-SM-Connectors](./JST-SM-Connectors) | Modifies the M4 Arm to use JST-SM instead of microfit connectors | :heavy_check_mark: | :x: |
  | claytono | [Skirt-Microfit-Inserts](./Skirt-Microfit-Inserts) | An iteration on dvorak74's Micro-Fit inserts, based around meteyou's fantastic G-code button mod. | :heavy_check_mark: | :x: |
 | Tobi0892 | [IKEA Drybox Carrot Patch](./IKEA_Drybox_Carrot_Patch) | Puts the Carrot Patch into a sealed 10.6l IKEA 365+ box to maintain ~10% humidity | :x: | :heavy_check_mark: |
+| Falovan | [Narrow KVP Spool Ramp](./Narrow_KVP_Spool_Ramp) | Adds a ramp to the carrot patch to prevent narrow spools from catching | :x: | :heavy_check_mark: |

@@ -63,7 +63,7 @@ You'll find those either on the main project folder or in the usermods folders.
  Only the King's Seat is yet to be released !
  
 ## BOM
- The BOM for those components can be found [here](https://docs.google.com/spreadsheets/d/1djVxoKnByb41ifVy2JTfhXmdf9UYpnUYfhvcNyUDuLw/edit?usp=sharing).
+ The BOM for those components can be found [here](https://docs.google.com/spreadsheets/d/1A_qeNeaVprh_iPbvLcLjvJ2o2NfCzjuJam3K3RkWW0w).
  
 ## Acknowledgements
 

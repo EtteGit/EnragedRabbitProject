@@ -20,6 +20,7 @@ This project aims to bring multimaterial capabilities to 3D printers using a sin
   - [Carrot Feeder](#carrot-feeder)
  
 ## Changelog
+- **September 14th 2021 :** Updated the BOM to ERCF V1.1 (release coming soon! tm) and added the new, incoming Toolhead Sensor BOM (bottom tabs)
 - **June 4th 2021 :** TopHatLockers and related (servo arm, TopGearHat, macros) have been released to the main branch, from the EarlyDevAccess branch. If you're already running EarlyDevAccess stuff, that won't change anything for you
 - **June 2nd 2021 :** Release of Carrot Patch V1.1
    - Increased handles section near the threaded insert for more robustness

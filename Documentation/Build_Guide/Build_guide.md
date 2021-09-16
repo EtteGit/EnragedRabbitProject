@@ -2,7 +2,7 @@
 
 # The print
 
-If you have printed a voron this is the familiar part. Use standard Voron print settings (listed below.) All files are available online[ ERCF](https://github.com/EtteGit/EnragedRabbitProject). The BOM can be found[ here](https://docs.google.com/spreadsheets/d/1djVxoKnByb41ifVy2JTfhXmdf9UYpnUYfhvcNyUDuLw/edit#gid=0).  
+If you have printed a voron this is the familiar part. Use standard Voron print settings (listed below.) All files are available online[ ERCF](https://github.com/EtteGit/EnragedRabbitProject). The BOM can be found[ here](https://docs.google.com/spreadsheets/d/1A_qeNeaVprh_iPbvLcLjvJ2o2NfCzjuJam3K3RkWW0w).  
 
 In the US formosissima has kits available. I am building using these kits.
 [Feeder](https://formosissima.com/products/mother-fucking-rabbit-kits),[ Patch](https://formosissima.com/products/enraged-rabbit-carrot-patch), and[ PTFE](https://formosissima.com/products/transparent-fep-tube-for-bowden)

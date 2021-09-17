@@ -43,11 +43,11 @@ These files will have nothing at the start of the filename.
 After the prints you need to build the 3 current components of the ERCF system.
 
 **The Carrot Feeder**: 
-This is the main unit. The Carrot Feeder allows the use of a high number of different filaments (tested up to 9 channels so far) and feed them, one at a time, into the printer tool head. The Carrot Feeder gear motion system (i.e. what is used to push and pull the filament) uses part of the Voron Design M4 extruder (namely the whole 80T wheel and part of the motor support//tensioning system) Build guide located[ here](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Carrot_Feeder/CarrotFeederAssemblyAndSetup.pdf).
+This is the main unit. The Carrot Feeder allows the use of a high number of different filaments (tested up to 9 channels so far) and feed them, one at a time, into the printer tool head. The Carrot Feeder gear motion system (i.e. what is used to push and pull the filament) uses part of the Voron Design M4 extruder (namely the whole 80T wheel and part of the motor support//tensioning system) Build guide located[ here](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Documentation/ERCF_Manual.pdf).
 
  **The Carrot Patch**:
 A spool-holder and buffer combo to help you deal with the filament management issue associated with multi-material systems.
-Build guide located[ here](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Carrot_Patch/CarrotPatchAssembly.pdf).
+Build guide located[ here](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Documentation/ERCP_Manual.pdf).
 
 **The filament sensor**:
 There are many versions of the toolhead sensor. While the nominal one is for the Galileo Clockwork, many others are available in the usermod folder. With that in mind, the BOM for the Enraged Rabbit Carrot Feeder does not cover the parts for these toolhead sensors. Please refer to each one for the required components.

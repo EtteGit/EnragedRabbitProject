@@ -48,12 +48,8 @@ https://streamable.com/cjl2iz
 ## Details
 
 There are 4 components so far : 
- - **The Enraged Rabbit Carrot Feeder (ERCF)**. The Carrot Feeder allows to use a high number of different filaments (tested  
-up to 9 channels so far) and feed them, one at a time, into the printer toolhead. The ERCF gear motion system (i.e. what  
-is used to push and pull the filament) is based on the Voron Design M4 extruder. The ERCF was inspired by the Prusa MMU2 and the Smuff.
+ - **The Enraged Rabbit Carrot Feeder (ERCF)**. The Carrot Feeder allows to use a high number of different filaments (tested up to 9 channels so far) and feed them, one at a time, into the printer toolhead. The ERCF gear motion system (i.e. what is used to push and pull the filament) is based on the Voron Design M4 extruder. The ERCF was inspired by the Prusa MMU2 and the Smuff.
 
-
- 
   <img src="https://cdn.discordapp.com/attachments/842792223769624605/888344547501940736/20210917_103629.jpg" alt="Carrot Feeder" width="600"/><img src="https://cdn.discordapp.com/attachments/842792223769624605/888344548298874880/20210917_103640.jpg" alt="Carrot Feeder 2" width="600"/>
  
  - **The Enraged Rabbit Carrot Patch (ERCP)**. It is a light spool-holder and buffer combo to help you deal with the filament  

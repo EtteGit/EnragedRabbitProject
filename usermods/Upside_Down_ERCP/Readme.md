@@ -30,5 +30,5 @@ Because gravity cannot be cheated, we need a bit of additional hardware.
   of proper code re-formatting tools which actually work and due to my lazyness the
   code is pretty ugly.
 
-<img src="images/Upside_Down_Sample" width=900/>
+<img src="images/Upside_Down_Sample.jpg" width=900/>
 

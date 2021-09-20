@@ -1,5 +1,7 @@
 # ERCP upside down mounting mod
 
+<img src="images/Upside_Down_Sample.jpg" width=900/>
+
 This mod allows the ERCP to be mounted upside-down, for example, below a shelf
 above your printer.
 
@@ -30,5 +32,4 @@ Because gravity cannot be cheated, we need a bit of additional hardware.
   of proper code re-formatting tools which actually work and due to my lazyness the
   code is pretty ugly.
 
-<img src="images/Upside_Down_Sample.jpg" width=900/>
 

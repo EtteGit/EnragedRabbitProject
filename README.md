@@ -22,6 +22,7 @@ You like this project? You want to support me and my work, help me bring new coo
   - [Carrot Feeder](#carrot-feeder)
  
 ## Changelog
+- **September 24th 2021 :** The ERCF V1.1 macros and python module are out! Also an updated manual (with the setup and calibration steps) and additionnal stuff for EASY BRD users! Have fun!
 - **September 17th 2021 :** The ERCF V1.1 assembly manual, STL files and the STEP file are now released! You'll find the manual in the "Documentation" section now, and the manual will keep growing with setup, tuning and slicer guides. A non-exhaustive patch note can be found in the Carrot_Feeder folder. Finally, note that the new software part of the ERCF V1.1 is not out yet, and the ERCF V1.1 hardware cannot be used with the ERCF V1.0 macros. V1.1 software will be released in a few days. Happy printing and assembly!
 - **September 14th 2021 :** Updated the BOM to ERCF V1.1 (release coming soon! tm) and added the new, incoming Toolhead Sensor BOM (bottom tabs)
 - **June 4th 2021 :** TopHatLockers and related (servo arm, TopGearHat, macros) have been released to the main branch, from the EarlyDevAccess branch. If you're already running EarlyDevAccess stuff, that won't change anything for you

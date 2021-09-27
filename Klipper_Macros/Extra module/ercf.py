@@ -57,7 +57,7 @@ class Ercf:
                 self.gear_stepper = manual_stepper[1]
         self.encoder_pin = config.get('encoder_pin')
         self.encoder_resolution = config.getfloat('encoder_resolution', 1.5, above=0.)
-        self._counter = EncoderCounter(self.printer, self.encoder_pin, 0.1, 0.0001, self.encoder_resolution)
+        self._counter = EncoderCounter(self.printer, self.encoder_pin, 0.01, 0.00001, self.encoder_resolution)
         self.ref_step_dist=self.gear_stepper.rail.steppers[0].get_step_dist()
         # Parameters
         self.long_moves_speed = float(config.get('long_moves_speed'))

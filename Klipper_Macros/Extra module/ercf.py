@@ -168,9 +168,9 @@ class Ercf:
         if sensor_state == True:
             self.step_length = -self.step_length
             self.both_in_sync = False # Do not move the ERCF if move is an unload
-        for step in range(int(self.home_length/abs(self.step_length))):
+        for step in range(int(self.home_length/abs(self.step_length)) + 1):
             if bool(self.sensor.runout_helper.filament_present) == sensor_state:
-                if step*abs(self.step_length) == self.home_length :
+                if step*abs(self.step_length) >= self.home_length :
                     self.gcode.respond_info("Unable to reach the toolhead sensor")
                     self.gcode.run_script_from_command("ERCF_UNSELECT_TOOL")
                     self.gcode.run_script_from_command("ERCF_PAUSE")

@@ -101,18 +101,10 @@ class Ercf:
                         'max': vmax, 'range': vmax - vmin}
 
     def cmd_ERCF_CALIBRATE_ENCODER(self, gcmd):
-        self.dist = gcmd.get_float('DIST', None)
-        self.range = gcmd.get_int('RANGE', None)
-        self.speed = gcmd.get_float('SPEED', None)
-        self.accel = gcmd.get_float('ACCEL', None)
-        if self.dist is None:
-            self.dist = 500.0
-        if self.speed is None:
-            self.speed = 100.0
-        if self.accel is None:
-            self.accel = 200.0
-        if self.range is None:
-            self.range = 5
+        self.dist = gcmd.get_float('DIST', 500.0)
+        self.range = gcmd.get_int('RANGE', 5)
+        self.speed = gcmd.get_float('SPEED', 100.0)
+        self.accel = gcmd.get_float('ACCEL', 200.0)
         self.plus_values = []
         self.minus_values = []
         self.toolhead = self.printer.lookup_object('toolhead')
@@ -155,13 +147,9 @@ class Ercf:
 
     def cmd_ERCF_HOME_EXTRUDER(self, gcmd):
         self.toolhead = self.printer.lookup_object('toolhead')
-        self.home_length = gcmd.get_float('TOTAL_LENGTH', None)
-        self.step_length = gcmd.get_float('STEP_LENGTH', None)
+        self.home_length = gcmd.get_float('TOTAL_LENGTH', 80.0)
+        self.step_length = gcmd.get_float('STEP_LENGTH', 1.0)
         self.both_in_sync = True
-        if self.home_length is None:
-            self.home_length = 80.0
-        if self.step_length is None:
-            self.step_length = 1.0
         self.home_speed = 35.0
         self.sensor = self.printer.lookup_object('filament_switch_sensor toolhead_sensor')
         sensor_state = bool(self.sensor.runout_helper.filament_present)

@@ -290,7 +290,7 @@ class Ercf:
                     self.gear_stepper.do_move(-(23.0 - self.delta), self.move_speed, self.move_accel, True)
                     self.toolhead.wait_moves()
                     
-                    if self._counter.reset_counts() < 5.0 :
+                    if self._counter.get_distance() < 5.0 :
                         return
         else:
             self._counter.reset_counts()

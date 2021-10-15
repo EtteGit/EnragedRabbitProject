@@ -22,6 +22,7 @@ You like this project? You want to support me and my work, help me bring new coo
   - [Carrot Feeder](#carrot-feeder)
  
 ## Changelog
+- **October 15th 2021 :** Added AfterBurner Clockwork toolhead sensor and associated manual sections.
 - **October 7th 2021 :** Updated SwitchWire mount, LGX on AfterBurner toolhead sensor and associated manual sections.
 - **October 1st 2021 :** Update including VORON SwitchWire mount, new Galileo Clockwork Toolhead sensor, additions to the manual and a few others things!
 - **September 24th 2021 :** The ERCF V1.1 macros and python module are out! Also an updated manual (with the setup and calibration steps) and additionnal stuff for EASY BRD users! Have fun!

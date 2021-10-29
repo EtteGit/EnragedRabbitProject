@@ -16,10 +16,9 @@ You like this project? You want to support me and my work, help me bring new coo
 - [Details](#details)
 - [BOM](#bom)
 - [Acknowledgements](#acknowledgements)
-- [FAQ](#faq)
-  - [General](#general)
-  - [Carrot Patch](#carrot-patch)
-  - [Carrot Feeder](#carrot-feeder)
+- [FAQ](https://github.com/EtteGit/EnragedRabbitProject/tree/main/Documentation/FAQ)
+  - [Carrot Patch](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Documentation/FAQ/FAQ_ERCP.md)
+  - [Carrot Feeder](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Documentation/FAQ/FAQ_ERCF.md)
  
 ## Changelog
 - **October 23th 2021 :** Update of the ERCF Macros and python module and added first part of manual Slicer setting section.

@@ -75,46 +75,5 @@ Only the King's Seat is yet to be released !
 ## Acknowledgements
 
 Thanks to the VORON Design devs and VORON discord members for the discussions and support, with a special thanks to the #honhonhonbaguette-FR members and @Tircown#8715!!
- 
-## FAQ
-### General
-**Q:** In what material should this be printed with?  
-**A:** The whole design assumes it's printed in ABS, so printing it in PLA or PETG may result in poor fits or tolerances.
-
-
-**Q:** What materials can be printed with the Enraged Rabbit?  
-**A:** So far, PLA, PETG, ABS and TPU were all tested with success. For TPU, both 95A and 30D (~80A) were tested and could be loaded//unloaded using the Enraged Rabbit Carrot Feeder. While the 95A TPU was also working well with the Carrot Patch spool holder + buffer combo, the 30D TPU is way too soft to make filament "loops". If you plan to use such ultra-soft TPU, make sure the concerned Carrot Patch is located in a "clean" area (to avoid your TPU buffer length to be caught on something) or use another buffer//spool holder.
-
-
-**Q:** Can I use this system on another printer than a VORON V2?  
-**A:** Yep, as long as your printer is running Klipper you should be good to go. Make sure the toolhead you are using have a filament sensor below the extruder gear (VORON AfterBurner, Galileo and LGX on AfterBurner are officialy supported, but plenty other toolheads have been modified to fit such a sensor, look in the usermods folder of this repo).
-
-
-**Q:** Can I use a dedicated control board?  
-**A:** Of course, Klipper allows you to use as many MCUs as you want. In the end you'll need to control 2 stepper motors, 1 5V servo, 1 mechanical switch, 1 IR sensor and 1 filament detector. You can find a dedicated PCB, made by @Tircown, here : https://github.com/Tircown/ERCF-easy-brd.
-
-
-### Carrot Patch
-**Q:** How does this work?  
-**A:** The spool holding part is a direct copy of the nominal spool holder on Vorons, i.e. an arm with a 4mm PTFE tube on which the spool rests and turns around. The buffer part of the Carrot Patch, which is inspired from several similar open-source designs, consists of a big wheel located in a filament "cage". Filament from the spool enters the filament cage, makes a few turns around the wheel and then exit the cage through a PTFE tube. When the extruder pull filament during a print, the filament will encircle the buffer wheel, which will simply turn to go along with the extruder pulling. When there is a retract // unload, the filament will be pushed back in the filament cage, making big loops (as much as the cage allows, so roughly 15 cm diameter), storing the filament buffer length in the cage. More filament turns around the wheel implies a longer buffer length. Use 4 turns to form a buffer of around 120 cm. 
-
-
-**Q:** Why not use a spool rewinder instead of a buffer?  
-**A:** Usual rewinders are using either a spring or a counterweight of some sort (nuts, bearing, spool itself...). The result is that it will rewind a certain number of spool turn, not a defined filament length (an almost empty spool will have a very small rewinding capabiliy). Also VORON V1s and V2s are big printers and the reverse bowden is usually quite long (around 80cm), meaning that typical rewinding solutions are not enough anyway. On the other hand, a buffer like the one on the Carrot Patch can handle very long filament buffer length.
-
-
-**Q:** The buffer wheel recess on the buffer cross has a smaller diamater than the buffer wheel itself, is this normal?  
-**A:** Yes. Goal of this recess is just to reduce the total contact surface between the wheel and the buffer cross "wall", while conserving a direct contact with the edge of the wheel.
-
-### Carrot Feeder
-**Q:** How many channels can I build on the Carrot Feeder?  
-**A:** Only mechanical limitation will come from the length of the 5mm D-cut shaft that holds the Bondtech-type Gears. Typically people are using 6, 9 or 12 channels, but you can go from 2 to whatever in theory.
-
-
-**Q:** Is there a cutter blade on the Carrot Feeder?  
-**A:** No, and there won't be (there is no need for that).
-
-
-Thanks !!
 
 Ette

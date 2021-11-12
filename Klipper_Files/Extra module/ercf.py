@@ -313,6 +313,7 @@ class Ercf:
         iterate = True
         buffer_length = 30.
         homing_move = gcmd.get_int('HOMING', 0, minval=0, maxval=1)
+        unknown_state = gcmd.get_int('UNKNOWN', 0, minval=0, maxval=1)
         req_length = gcmd.get_float('LENGTH', 1200.)
         self.toolhead.wait_moves()
 
@@ -321,6 +322,12 @@ class Ercf:
             req_length = req_length - buffer_length
         else:
             iterate = False
+
+        if unknown_state :
+            iterate = False
+            self._counter.reset_counts()
+            self._gear_stepper_move_wait(-req_length)
+            homing_move = 1
 
         if homing_move :
             iterate = False

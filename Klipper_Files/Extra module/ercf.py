@@ -191,6 +191,13 @@ class Ercf:
         mean_plus = self._sample_stats(plus_values)['mean']
         mean_minus = self._sample_stats(min_values)['mean']
         half_mean = ( float(mean_plus) + float(mean_minus) ) / 4
+
+        if half_mean == 0:
+            gcmd.respond_info("No counts measured. Ensure a tool was selected " +
+                              "before running calibration and that your encoder " +
+                              "is working properly")
+            return
+
         resolution = dist / half_mean
         old_result = half_mean * self.encoder_resolution
         new_result = half_mean * resolution

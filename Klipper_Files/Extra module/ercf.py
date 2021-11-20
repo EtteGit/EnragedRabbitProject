@@ -58,18 +58,6 @@ class Ercf:
                                             self.handle_connect)
         # Manual steppers
         self.selector_stepper = self.gear_stepper = None
-        for manual_stepper in self.printer.lookup_objects('manual_stepper'):
-            rail_name = manual_stepper[1].get_steppers()[0].get_name()
-            if rail_name == 'manual_stepper selector_stepper':
-                self.selector_stepper = manual_stepper[1]
-            if rail_name == 'manual_stepper gear_stepper':
-                self.gear_stepper = manual_stepper[1]
-        if self.selector_stepper is None:
-            raise config.error(
-                "Manual_stepper selector_stepper must be specified")
-        if self.gear_stepper is None:
-            raise config.error(
-                "Manual_stepper gear_stepper must be specified")
         self.encoder_pin = config.get('encoder_pin')
         self.encoder_resolution = config.getfloat('encoder_resolution', 1.5,
                                             above=0.)
@@ -110,9 +98,24 @@ class Ercf:
         self.gcode.register_command('ERCF_MOVE_SELECTOR',
                     self.cmd_ERCF_MOVE_SELECTOR,
                     desc=self.cmd_ERCF_MOVE_SELECTOR_help)
+        self.gcode.register_command('ERCF_ENDLESSSPOOL_UNLOAD',
+                    self.cmd_ERCF_ENDLESSSPOOL_UNLOAD,
+                    desc=self.cmd_ERCF_ENDLESSSPOOL_UNLOAD_help)
 
     def handle_connect(self):
         self.toolhead = self.printer.lookup_object('toolhead')
+        for manual_stepper in self.printer.lookup_objects('manual_stepper'):
+            rail_name = manual_stepper[1].get_steppers()[0].get_name()
+            if rail_name == 'manual_stepper selector_stepper':
+                self.selector_stepper = manual_stepper[1]
+            if rail_name == 'manual_stepper gear_stepper':
+                self.gear_stepper = manual_stepper[1]
+        if self.selector_stepper is None:
+            raise config.error(
+                "Manual_stepper selector_stepper must be specified")
+        if self.gear_stepper is None:
+            raise config.error(
+                "Manual_stepper gear_stepper must be specified")
 
     def get_status(self, eventtime):
         encoder_pos = float(self._counter.get_distance())
@@ -478,6 +481,10 @@ class Ercf:
                 % self.MACRO_PAUSE)
             self.gcode.run_script_from_command(self.MACRO_UNSELECT_TOOL)
             self.gcode.run_script_from_command(self.MACRO_PAUSE)
+
+    cmd_ERCF_ENDLESSSPOOL_UNLOAD_help = "Unload the filament from the toolhead"
+    def cmd_ERCF_ENDLESSSPOOL_UNLOAD(self, gcmd):
+        self.gcode.respond_info("This is a placeholder")
 
 def load_config(config):
     return Ercf(config)

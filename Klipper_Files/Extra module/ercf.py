@@ -63,7 +63,7 @@ class Ercf:
                                             above=0.)
         self._counter = EncoderCounter(self.printer, self.encoder_pin, 0.01,
                                             0.00001, self.encoder_resolution)
-        self.ref_step_dist=self.gear_stepper.rail.steppers[0].get_step_dist()
+        
         # Parameters
         self.long_moves_speed = config.getfloat('long_moves_speed', 100.)
         self.long_moves_accel = config.getfloat('long_moves_accel', 400.)
@@ -116,6 +116,7 @@ class Ercf:
         if self.gear_stepper is None:
             raise config.error(
                 "Manual_stepper gear_stepper must be specified")
+        self.ref_step_dist=self.gear_stepper.rail.steppers[0].get_step_dist()
 
     def get_status(self, eventtime):
         encoder_pos = float(self._counter.get_distance())

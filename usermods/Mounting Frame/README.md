@@ -5,8 +5,8 @@ Mounting frame for a 6x ERCF Setup - In case you do not have the otherwise neces
 
 ## Images
 
-<img src="Images/20211123_065824586_iOS" alt="Benders" width="950"/>
-<img src="Images/2021-11-23.png" alt="Benders" width="950"/>
+<img src="Images/20211123_065824586_iOS.png" alt="Photo" width="950"/>
+<img src="Images/2021-11-23.png" alt="Fusion360" width="950"/>
 
 ## Details
 

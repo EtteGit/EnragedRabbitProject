@@ -10,6 +10,12 @@ Mounting frame for a 6x ERCF Setup - In case you do not have the otherwise neces
 
 ## Details
 
-The intent for the Frame is to provide the necessary rgidity to the ERCF Assembly while tuning it off the 3D Printer. Does not come with the 3D printed hooks for attaching it to a Voron Frame.
+Important: The design assumes the two furthest apart lying mounting holes along the length being 198mm in distance ( center to center ) thus you ERCF being in spec.
 
-The design assumes your ERCF being in spec with the distance between the two furthest apart lying mountinf holes along the length being 198mm in distance.
+Comes with a built in ERCF Easy-Brd mounting solution ( shamelessly stolen from the original Mount including the Print in Place Supports for it - I suggest importing it as a "part with mltiple parts" ). The rear end has an Electrical/Data Wiring passthrough with built in ZipTie mounting solution. The 6 holes in the Frame need to be popuated with the Voron typical M3 Threaded Inserts for the ERCF to be mounted to. Does not come with the 3D printed hooks in the Photo for attaching it to your 3D Printer.
+
+## BOM
+
+- About 75g of Filament using standard Voron print settings.
+- 6x M3 Threaded Inserts
+- 1x ZipTie ( or more depending on your cable management standards )

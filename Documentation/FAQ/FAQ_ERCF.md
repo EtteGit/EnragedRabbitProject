@@ -17,6 +17,8 @@ sensor and the BMG gear of the encoder cart. The black plastic wall between the 
 have to be very close to the BMG dual gear part, but not touching it. If it is 
 too far, gently file down the 3D printed part where the TCRT5000 rests (i.e. where it is screwed) too get it closer to the gear.
 
+In case you printed the encoder cart with bright filament (e.g. white or yellow) it may be possible that the plastic cart itself is too reflective, making the sensor being always on/red. If so, try printing the encoder cart using a black filament.
+
 ### Top Hats Lockers
 **Q: When performing the test grip, using higher Top Hat Lockers makes the servo arm go back after the "ERCF_SERVO_DOWN" move, lowering the grip on the filament.**  
 **A:** Increase a bit the servo_down angle so it pushes further.

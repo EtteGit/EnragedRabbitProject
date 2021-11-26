@@ -63,6 +63,7 @@ class Ercf:
                                             above=0.)
         self._counter = EncoderCounter(self.printer, self.encoder_pin, 0.01,
                                             0.00001, self.encoder_resolution)
+        
         # Parameters
         self.long_moves_speed = config.getfloat('long_moves_speed', 100.)
         self.long_moves_accel = config.getfloat('long_moves_accel', 400.)
@@ -97,9 +98,9 @@ class Ercf:
         self.gcode.register_command('ERCF_MOVE_SELECTOR',
                     self.cmd_ERCF_MOVE_SELECTOR,
                     desc=self.cmd_ERCF_MOVE_SELECTOR_help)
-#        self.gcode.register_command('ERCF_ENDLESSSPOOL_UNLOAD',
-#                    self.cmd_ERCF_ENDLESSSPOOL_UNLOAD,
-#                    desc=self.cmd_ERCF_ENDLESSSPOOL_UNLOAD_help)
+        self.gcode.register_command('ERCF_ENDLESSSPOOL_UNLOAD',
+                    self.cmd_ERCF_ENDLESSSPOOL_UNLOAD,
+                    desc=self.cmd_ERCF_ENDLESSSPOOL_UNLOAD_help)
 
     def handle_connect(self):
         self.toolhead = self.printer.lookup_object('toolhead')
@@ -482,8 +483,9 @@ class Ercf:
             self.gcode.run_script_from_command(self.MACRO_UNSELECT_TOOL)
             self.gcode.run_script_from_command(self.MACRO_PAUSE)
 
-#    cmd_ERCF_ENDLESSSPOOL_UNLOAD_help = "Unload the filament from the toolhead"
-#    def cmd_ERCF_ENDLESSSPOOL_UNLOAD(self, gcmd):
+    cmd_ERCF_ENDLESSSPOOL_UNLOAD_help = "Unload the filament from the toolhead"
+    def cmd_ERCF_ENDLESSSPOOL_UNLOAD(self, gcmd):
+        self.gcode.respond_info("This is a placeholder")
 
 def load_config(config):
     return Ercf(config)

@@ -486,31 +486,31 @@ class Ercf:
     def cmd_ERCF_ENDLESSSPOOL_UNLOAD(self, gcmd):
         self.gcode.respond_info("This is a placeholder")
 
-        cmd_ERCF_FINALIZE_LOAD_help = "Finalize the load of a tool to the nozzle"
-        def cmd_ERCF_FINALIZE_LOAD(self, gcmd):
-            length = gcmd.get_float('LENGTH', None, above=0.)
-            if length is None :
-                self.gcode.respond_info("LENGTH has to be specified")
-                return
-            self._counter.reset_counts()
-            pos = self.toolhead.get_position()
-            pos[3] += 15.
-            self.toolhead.manual_move(pos, 30)
-            pos[3] += ( length - 20. )
-            self.toolhead.manual_move(pos, 30)
-            pos[3] += 5.
-            self.toolhead.manual_move(pos, 10)
-            self.toolhead.wait_moves()
-            self.toolhead.dwell(0.4)
-            final_encoder_pos = self._counter.get_distance()
-            if final_encoder_pos < ( length - 15.0) :
-                self.gcode.respond_info(
-                    "Filament seems blocked between the extruder and the nozzle,"
-                    " calling %s..."
-                    % self.MACRO_PAUSE)
-                self.gcode.run_script_from_command(self.MACRO_PAUSE)
-                return
-            self.gcode.respond_info("Filament loaded successfully")
+    cmd_ERCF_FINALIZE_LOAD_help = "Finalize the load of a tool to the nozzle"
+    def cmd_ERCF_FINALIZE_LOAD(self, gcmd):
+        length = gcmd.get_float('LENGTH', None, above=0.)
+        if length is None :
+            self.gcode.respond_info("LENGTH has to be specified")
+            return
+        self._counter.reset_counts()
+        pos = self.toolhead.get_position()
+        pos[3] += 15.
+        self.toolhead.manual_move(pos, 30)
+        pos[3] += ( length - 20. )
+        self.toolhead.manual_move(pos, 30)
+        pos[3] += 5.
+        self.toolhead.manual_move(pos, 10)
+        self.toolhead.wait_moves()
+        self.toolhead.dwell(0.4)
+        final_encoder_pos = self._counter.get_distance()
+        if final_encoder_pos < ( length - 15.0) :
+            self.gcode.respond_info(
+                "Filament seems blocked between the extruder and the nozzle,"
+                " calling %s..."
+                % self.MACRO_PAUSE)
+            self.gcode.run_script_from_command(self.MACRO_PAUSE)
+            return
+        self.gcode.respond_info("Filament loaded successfully")
 
 def load_config(config):
     return Ercf(config)

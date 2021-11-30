@@ -322,43 +322,36 @@ class Ercf:
         unknown_state = gcmd.get_int('UNKNOWN', 0, minval=0, maxval=1)
         req_length = gcmd.get_float('LENGTH', 1200.)
         self.toolhead.wait_moves()
-
         # i.e. long move that will be fast and iterated using the encoder
         if req_length > self.LONG_MOVE_THRESHOLD: 
             req_length = req_length - buffer_length
         else:
             iterate = False
-
         if unknown_state :
             iterate = False
             self._counter.reset_counts()
             self._gear_stepper_move_wait(-req_length)
             homing_move = 1
-
         if homing_move :
             iterate = False
             for step in range( int(req_length / 15.) ):
                 self._counter.reset_counts()
                 self._gear_stepper_move_wait(-15.)
                 delta = 15. - self._counter.get_distance()
-
                 # Filament is now out of the encoder
                 if delta >= 3. :
                     self._counter.reset_counts()
                     self._gear_stepper_move_wait(-(23. - delta))
-
                     if self._counter.get_distance() < 5. :
                         return
         else:
             self._counter.reset_counts()
             self._gear_stepper_move_wait(-req_length)
-
         if iterate :
             counter_distance = self._counter.get_distance()
             self.gcode.respond_info(
                         "Unload move done, requested = %.1f, measured = %.1f"
                         % (req_length, counter_distance) )
-            
             delta_length = req_length - counter_distance
             if delta_length >= 3.0:
                 self._gear_stepper_move_wait(-delta_length)
@@ -366,18 +359,24 @@ class Ercf:
                 self.gcode.respond_info("Correction unload move done,"
                                         " requested = %.1f, measured = %.1f"
                                         %(req_length, counter_distance))
-
+                if ( req_length - counter_distance ) >= 15. :
+                    # Unload failed
+                    self.gcode.respond_info(
+                        "Too much slippage detected during the unload,"
+                        " please check the ERCF, calling %s..."
+                        % self.MACRO_PAUSE)
+                    self.gcode.run_script_from_command(self.MACRO_UNSELECT_TOOL)
+                    self.gcode.run_script_from_command(self.MACRO_PAUSE)
+                    return
             # Final move to park position
             for step in range( int(buffer_length / 15.) + 1 ):
                 self._counter.reset_counts()
                 self._gear_stepper_move_wait(-15.)
                 delta = 15. - self._counter.get_distance()
-
                 # Filament is now out of the encoder
                 if delta >= 3. :
                     self._counter.reset_counts()
                     self._gear_stepper_move_wait(-(23. - delta))
-
                     if self._counter.get_distance() < 5. :
                         return
             # Filament stuck in encoder

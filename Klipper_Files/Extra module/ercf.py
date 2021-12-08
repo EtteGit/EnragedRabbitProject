@@ -502,7 +502,7 @@ class Ercf:
         self.toolhead.wait_moves()
         self.toolhead.dwell(0.4)
         final_encoder_pos = self._counter.get_distance()
-        if final_encoder_pos < ( length - 25.0) :
+        if final_encoder_pos < 15. :
             self.gcode.respond_info(
                 "Filament seems blocked between the extruder and the nozzle,"
                 " calling %s..."

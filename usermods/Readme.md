@@ -29,3 +29,4 @@ like so:
 | jorender | [Printable_drag_chain](./Printable_drag_chain)  | A printable cable chain suitable for use with the Enraged Rabbit Carrot Feeder | :heavy_check_mark: | :x: |
 | claytono | [Skirt-Microfit-Inserts](./Skirt-Microfit-Inserts) | An iteration on dvorak74's Micro-Fit inserts, based around meteyou's fantastic G-code button mod. | :heavy_check_mark: | :x: |
 | Drachenkaetzchen | [Upside Down ERCP](./Upside_Down_ERCP) | Mod to allow mounting the ERCP upside down, for example, below a shelf | :x: | :heavy_check_mark: |
+| str1pes | [MagFeet](./MagFeet) | Easy mounting/removal for 2020 extrusions | :x: | :heavy_check_mark: |

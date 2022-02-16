@@ -391,7 +391,13 @@ class Ercf:
     def cmd_ERCF_SET_STEPS(self, gcmd):
         ratio = gcmd.get_float('RATIO', 1., above=0.)
         new_step_dist = self.ref_step_dist / ratio
-        self.gear_stepper.rail.steppers[0].set_step_dist(new_step_dist)
+        stepper = self.gear_stepper.rail.steppers[0]
+        if hasattr(stepper, "set_rotation_distance"):
+            new_rotation_dist = new_step_dist * stepper.get_rotation_distance()[1]
+            stepper.set_rotation_distance(new_rotation_dist)
+        else:
+            # bw compatibilty for old klipper versions
+            stepper.set_step_dist(new_step_dist)
 
     cmd_ERCF_GET_SELECTOR_POS_help = "Report the selector motor position"
     def cmd_ERCF_GET_SELECTOR_POS(self, gcmd):

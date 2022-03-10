@@ -8,7 +8,7 @@ Here are my SuperSlicer settings related to the multimaterial :
 
 ## Printer Settings
 #### Custom G-code
-Tool change G-code : nothing (leave it empty)
+Tool change G-code : T[next_extruder]
 
 #### Single extruder MM setup
 Cooling tube position : 40mm

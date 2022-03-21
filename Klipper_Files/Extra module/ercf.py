@@ -322,6 +322,7 @@ class Ercf:
 
     cmd_ERCF_UNLOAD_help = "Unload filament and park it in the ERCF"
     def cmd_ERCF_UNLOAD(self, gcmd):
+        self.toolhead.dwell(0.2)
         # Define unload move parameters
         iterate = True
         buffer_length = 30.

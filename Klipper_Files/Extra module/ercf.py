@@ -295,7 +295,7 @@ class Ercf:
                             %(req_length, counter_distance))
             diff_distance = req_length - counter_distance
             
-            if diff_distance <= 4. or not iterate :
+            if diff_distance <= 6. or not iterate :
                 # Measured move is close enough or no iterations : load succeeds
                 return
 
@@ -307,7 +307,7 @@ class Ercf:
                                         " requested = %.1f, measured = %.1f"
                                         %(req_length, counter_distance))
                 diff_distance = req_length - counter_distance
-                if diff_distance <= 4.:
+                if diff_distance <= 6.:
                     # Measured move is close enough : load succeeds
                     return
                 if diff_distance > self.LONG_MOVE_THRESHOLD:
@@ -322,6 +322,7 @@ class Ercf:
 
     cmd_ERCF_UNLOAD_help = "Unload filament and park it in the ERCF"
     def cmd_ERCF_UNLOAD(self, gcmd):
+        self.toolhead.dwell(0.2)
         # Define unload move parameters
         iterate = True
         buffer_length = 30.
@@ -376,7 +377,7 @@ class Ercf:
                     self.gcode.run_script_from_command(self.MACRO_PAUSE)
                     return
             # Final move to park position
-            for step in range( int(buffer_length / 15.) + 1 ):
+            for step in range( int(buffer_length / 15.) + 2 ):
                 self._counter.reset_counts()
                 self._gear_stepper_move_wait(-15.)
                 delta = 15. - self._counter.get_distance()
@@ -413,7 +414,7 @@ class Ercf:
         init_position = self.selector_stepper.steppers[0].get_mcu_position()
         #self._selector_stepper_move_wait(-ref_pos, 1, True, 50.)
         self.command_string = (
-                        "MANUAL_STEPPER STEPPER=selector_stepper SPEED=40"
+                        "MANUAL_STEPPER STEPPER=selector_stepper SPEED=50"
                         " MOVE=-" + str(ref_pos) + " STOP_ON_ENDSTOP=1")
         self.gcode.run_script_from_command(self.command_string)
 

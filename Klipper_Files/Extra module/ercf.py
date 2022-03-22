@@ -45,10 +45,10 @@ class EncoderCounter:
 class Ercf:
 
     LONG_MOVE_THRESHOLD = 70.
-    MACRO_SERVO_UP = "ERCF_SERVO_UP"
-    MACRO_SERVO_DOWN = "ERCF_SERVO_DOWN"
-    MACRO_UNSELECT_TOOL = "ERCF_UNSELECT_TOOL"
-    MACRO_PAUSE = "ERCF_PAUSE"
+    MACRO_SERVO_UP = "_ERCF_SERVO_UP"
+    MACRO_SERVO_DOWN = "_ERCF_SERVO_DOWN"
+    MACRO_UNSELECT_TOOL = "_ERCF_UNSELECT_TOOL"
+    MACRO_PAUSE = "_ERCF_PAUSE"
 
     def __init__(self, config):
         self.config = config
@@ -322,8 +322,8 @@ class Ercf:
 
     cmd_ERCF_UNLOAD_help = "Unload filament and park it in the ERCF"
     def cmd_ERCF_UNLOAD(self, gcmd):
-        self.toolhead.dwell(0.2)
         # Define unload move parameters
+        self.toolhead.dwell(0.2)
         iterate = True
         buffer_length = 30.
         homing_move = gcmd.get_int('HOMING', 0, minval=0, maxval=1)
@@ -412,7 +412,6 @@ class Ercf:
         ref_pos = gcmd.get_float('REF', 0.)
         self.selector_stepper.do_set_position(0.)
         init_position = self.selector_stepper.steppers[0].get_mcu_position()
-        #self._selector_stepper_move_wait(-ref_pos, 1, True, 50.)
         self.command_string = (
                         "MANUAL_STEPPER STEPPER=selector_stepper SPEED=50"
                         " MOVE=-" + str(ref_pos) + " STOP_ON_ENDSTOP=1")

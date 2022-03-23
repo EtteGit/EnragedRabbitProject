@@ -20,6 +20,7 @@ You like this project? You want to support me and my work, help me bring new coo
   - [Carrot Feeder](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Documentation/FAQ/FAQ_ERCF.md)
  
 ## Changelog
+- **March 23th 2022 :** Revamp of ERCF unload sequence during a print, possibility to use stallguard capabilities to detect selector blockages, new encoder cart and much more
 - **October 23th 2021 :** Update of the ERCF Macros and python module and added first part of manual Slicer setting section.
 - **October 15th 2021 :** Added AfterBurner Clockwork toolhead sensor and associated manual sections.
 - **October 7th 2021 :** Updated SwitchWire mount, LGX on AfterBurner toolhead sensor and associated manual sections.

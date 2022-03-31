@@ -20,6 +20,7 @@ You like this project? You want to support me and my work, help me bring new coo
   - [Carrot Feeder](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Documentation/FAQ/FAQ_ERCF.md)
  
 ## Changelog
+- **March 23th 2022 :** Revamp of ERCF unload sequence during a print, possibility to use stallguard capabilities to detect selector blockages, new encoder cart and much more
 - **October 23th 2021 :** Update of the ERCF Macros and python module and added first part of manual Slicer setting section.
 - **October 15th 2021 :** Added AfterBurner Clockwork toolhead sensor and associated manual sections.
 - **October 7th 2021 :** Updated SwitchWire mount, LGX on AfterBurner toolhead sensor and associated manual sections.
@@ -40,7 +41,7 @@ You like this project? You want to support me and my work, help me bring new coo
 
 ## Showroom
 
-<img src="Showroom/Spidermans.png" alt="Spidermans" width="950"/><img src="Showroom/SpongeBobs.png" alt="SpongeBobs" width="950"/><img src="Showroom/Benders.png" alt="Benders" width="950"/><img src=Showroom/Bimaterial_logo.png alt="Voron Logo TPU" width="650"/><img src=Showroom/5_colors_test.png alt="5_colors_test" width="300"/><img src=Showroom/9_colors_test.png alt="9_colors_test" width="400"/><img src="Showroom/Gustav_brothers.png" alt="Gustav brothers" width="550"/>
+<img src="Showroom/Spidermans.png" alt="Spidermans" width="950"/><img src="Showroom/NoS_Prints.png" alt="NoS_prints" width="950"/><img src="Showroom/BnE_Prints.png" alt="BnE_Prints" width="950"/><img src=Showroom/Bimaterial_logo.png alt="Voron Logo TPU" width="650"/><img src=Showroom/9_colors_test.png alt="9_colors_test" width="400"/>
 
 ## Videos
 Here are videos of the system in action. I need to release more videos...

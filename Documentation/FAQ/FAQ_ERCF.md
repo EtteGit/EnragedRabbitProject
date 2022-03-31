@@ -11,18 +11,16 @@ Here is the FAQ for the Enraged Rabbit Carrot Feeder.
 If the sensor is always on / red even if there is nothing in front of it, it is 
 probably dead (either DOA or you miss-plugged the 5V into the signal for example).
 
-If it behaves as expected from this test, check the distance between the TCRT5000 
-sensor and the BMG gear of the encoder cart. The black plastic wall between the two IR Leds of the sensor
-have to be very close to the BMG dual gear part, but not touching it. If it is 
-too far, gently file down the 3D printed part where the TCRT5000 rests (i.e. where it is screwed) too get it closer to the gear.
+Make sur you did print the encoder_cage in a black filament, to avoid IR reflections.
 
-In case you printed the encoder cart with bright filament (e.g. white or yellow) it may be possible that the plastic cart itself is too reflective, making the sensor being always on/red. If so, try printing the encoder cart using a black filament.
+Don't forget to use the M3x16 SHCS bottom screw of the encoder cart to adjust the sensor height relative to the BMG gears.
+You can also use a M3x8 SHCS on the hole below the bearing "spring" to increase the spring tension on the ilder, in case you need to.
 
-**Q: When performing the test grip, using higher Top Hat Lockers makes the servo arm go back after the "ERCF_SERVO_DOWN" move, lowering the grip on the filament.**  
+**Q: When performing the test grip, using higher Top Hat Lockers makes the servo arm go back after the "_ERCF_SERVO_DOWN" move, lowering the grip on the filament.**  
 **A:** Increase a bit the servo_down angle so it pushes further.
 
 **Q: While everything is working fine on TX commands out of a print, during a print the servo will engage and then directly disengage before the unload move.**  
-**A:** This is a Klipper issue with servos and timing. If this happens to you, change one of the "G4 P100" of the ERCF_SERVO_DOWN macro (ercf_software.cfg) into a "G4 P105". This will add 5ms of dwell for this sequence and fix your issue. Note that this issue cannot be predicted, as it is related to the hardware (mcu, servos) you are using.
+**A:** This is a Klipper issue with servos and timing. If this happens to you, adjust a bit the variable_extra_servo_dwell_down value in the ercf_software.cfg, this will add some ms of dwell for this sequence and fix your issue. Don't forget to reload the firmware for it to work. Try increments of 2, but remember that maybe you'll need 2, 5 or even. Note that this issue cannot be predicted, as it is related to the hardware (mcu, servos) you are using.
 
 **Q: My printer issued a "Move out of range" error after the resume following and ERCF_PAUSE.**  
 **A:** Make sure you are using the proper PAUSE and RESUME macros from the Enraged Rabbit GitHub repository (in the client_macros.cfg) and that no other similar macros are in your Klipper config files. What is happening here is that other PAUSE and RESUME macros are being used, and the printer restarts the print in the relative positioning mode, resulting in moves that are out of the print area.

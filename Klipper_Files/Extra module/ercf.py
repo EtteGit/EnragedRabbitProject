@@ -501,7 +501,8 @@ class Ercf:
     cmd_ERCF_FINALIZE_LOAD_help = "Finalize the load of a tool to the nozzle"
     def cmd_ERCF_FINALIZE_LOAD(self, gcmd):
         length = gcmd.get_float('LENGTH', 30.0, above=0.)
-        threshold = gcmd.get_float('THRESHOLD', 15.0, above=0.)
+        tune = gcmd.get_int('TUNE', 0)
+        threshold = gcmd.get_float('THRESHOLD', 10.0, above=0.)
         if length is None :
             self.gcode.respond_info("LENGTH has to be specified")
             return
@@ -511,11 +512,21 @@ class Ercf:
         self.toolhead.manual_move(pos, 20)
         self.toolhead.wait_moves()
         final_encoder_pos = self._counter.get_distance()
-        if final_encoder_pos < ( length - threshold) :
+        if tune == 1 :
+            self.gcode.respond_info(
+                "Measured value from the encoder was %.1f"
+                % final_encoder_pos)
+            threshold_value = final_encoder_pos - 10.0
+            self.gcode.respond_info(
+                "Check the manual to verify that this load was sucessful, and if so, use the following value for your threshold parameter :  %.1f"
+                % threshold_value)
+            return
+        if (final_encoder_pos < threshold) :
             self.gcode.respond_info(
                 "Filament seems blocked between the extruder and the nozzle,"
+                "threshold is %.1f while measured value was %.1f,"
                 " calling %s..."
-                % self.MACRO_PAUSE)
+                % (threshold, final_encoder_pos, self.MACRO_PAUSE))
             self.gcode.run_script_from_command(self.MACRO_PAUSE)
             return
         self.gcode.respond_info("Filament loaded successfully")

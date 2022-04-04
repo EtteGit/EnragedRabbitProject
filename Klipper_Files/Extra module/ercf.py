@@ -435,10 +435,6 @@ class Ercf:
         travel = ( mcu_position - init_mcu_pos ) * selector_steps
         delta = abs( target_move - travel )
         if delta <= 2.0 :
-            commanded = self.selector_stepper.steppers[0].get_commanded_position()
-            frommcu = travel + init_position
-            self.gcode.respond_info("target = %.1f init_position = %.1f commanded = %.1f frommcu = %.1f"
-                                %(target, init_position, commanded, frommcu))
             self.selector_stepper.do_set_position( init_position + travel )
             self._selector_stepper_move_wait(target)
             return
@@ -470,10 +466,6 @@ class Ercf:
             travel = ( mcu_position - init_mcu_pos ) *selector_steps
             delta = abs( target_move - travel )
             if delta <= 2.0 :
-                commanded = self.selector_stepper.steppers[0].get_commanded_position()
-                frommcu = travel + init_position
-                self.gcode.respond_info("target = %.1f init_position = %.1f commanded = %.1f frommcu = %.1f"
-                                    %(target, init_position, commanded, frommcu))
                 self.selector_stepper.do_set_position( init_position + travel )
                 self._selector_stepper_move_wait(target)
                 return

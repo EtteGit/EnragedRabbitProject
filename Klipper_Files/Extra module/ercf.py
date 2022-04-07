@@ -314,9 +314,9 @@ class Ercf:
                     break
             # Load failed
             self.gcode.respond_info(
-                "Too much slippage detected during the load,"
-                " please check the ERCF, calling %s..."
-                % self.MACRO_PAUSE)
+				"Too much slippage detected during the load,"
+				" requested = %.1f, measured = %.1f - calling %s..."
+				%(req_length, counter_distance, self.MACRO_PAUSE))
             self.gcode.run_script_from_command(self.MACRO_UNSELECT_TOOL)
             self.gcode.run_script_from_command(self.MACRO_PAUSE)
 
@@ -371,8 +371,8 @@ class Ercf:
                     # Unload failed
                     self.gcode.respond_info(
                         "Too much slippage detected during the unload,"
-                        " please check the ERCF, calling %s..."
-                        % self.MACRO_PAUSE)
+						" requested = %.1f, measured = %.1f - calling %s..."
+                        %(req_length, counter_distance, self.MACRO_PAUSE))
                     self.gcode.run_script_from_command(self.MACRO_UNSELECT_TOOL)
                     self.gcode.run_script_from_command(self.MACRO_PAUSE)
                     return

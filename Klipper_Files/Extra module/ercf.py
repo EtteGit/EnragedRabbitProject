@@ -272,7 +272,9 @@ class Ercf:
                                     " retry loading...")
             # Reengage gears and retry
             self.gcode.run_script_from_command(self.MACRO_SERVO_UP)
+            self.toolhead.wait_moves()
             self.gcode.run_script_from_command(self.MACRO_SERVO_DOWN)
+            self.toolhead.wait_moves()
             self._gear_stepper_move_wait(self.LONG_MOVE_THRESHOLD)
 
             if self._counter.get_distance() <= 6.:

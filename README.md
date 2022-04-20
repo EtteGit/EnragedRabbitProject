@@ -76,6 +76,6 @@ Only the King's Seat is yet to be released !
 
 Thanks to the VORON Design devs and VORON discord members for the discussions and support, with a special thanks to the #honhonhonbaguette-FR members and @Tircown#8715!!
 
-Thanks to Fabreeko, DFH, Blurolls and many others for supporting this project!
+Thanks to Fabreeko, DeepFriedHero (DFH), Blurolls and many others for supporting this project!
 
 Ette

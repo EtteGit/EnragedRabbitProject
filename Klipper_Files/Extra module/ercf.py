@@ -61,8 +61,8 @@ class Ercf:
         self.encoder_pin = config.get('encoder_pin')
         self.encoder_resolution = config.getfloat('encoder_resolution', 1.5,
                                             above=0.)
-        self._counter = EncoderCounter(self.printer, self.encoder_pin, 0.01,
-                                            0.00001, self.encoder_resolution)
+        self._counter = EncoderCounter(self.printer, self.encoder_pin, 0.1,
+                                            0.0001, self.encoder_resolution)
         
         # Parameters
         self.long_moves_speed = config.getfloat('long_moves_speed', 100.)

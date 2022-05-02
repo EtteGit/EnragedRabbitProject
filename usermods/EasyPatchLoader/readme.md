@@ -12,9 +12,9 @@ This buffer wheel replaces the existing buffer wheel.
 [Download STL](STL/%5Ba%5D_Buffer_Wheel_Easy_Load.stl)
 
 ## Images
-[Easy Load Buffer Wheel](./images/ercf_ez_load_001.jpg)
-[Easy Load Buffer Wheel Step 1](./images/ercf_ez_load_002.jpg)
-[Easy Load Buffer Wheel Step 2](./images/ercf_ez_load_003.jpg)
-[Easy Load Buffer Wheel Step 3](./images/ercf_ez_load_004.jpg)
-[Easy Load Buffer Wheel Step 4](./images/ercf_ez_load_005.jpg)
-[Easy Load Buffer Wheel Step 5](./images/ercf_ez_load_006.jpg)
+![Easy Load Buffer Wheel](./images/ercf_ez_load_001.jpg)
+![Easy Load Buffer Wheel Step 1](./images/ercf_ez_load_002.jpg)
+![Easy Load Buffer Wheel Step 2](./images/ercf_ez_load_003.jpg)
+![Easy Load Buffer Wheel Step 3](./images/ercf_ez_load_004.jpg)
+![Easy Load Buffer Wheel Step 4](./images/ercf_ez_load_005.jpg)
+![Easy Load Buffer Wheel Step 5](./images/ercf_ez_load_006.jpg)

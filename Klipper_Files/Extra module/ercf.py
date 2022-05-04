@@ -332,6 +332,13 @@ class Ercf:
         unknown_state = gcmd.get_int('UNKNOWN', 0, minval=0, maxval=1)
         req_length = gcmd.get_float('LENGTH', 1200.)
         self.toolhead.wait_moves()
+        # Do not unload if filament is still in the toolhead
+        sensor = self.printer.lookup_object(
+                    "filament_switch_sensor toolhead_sensor")
+        if bool(sensor.runout_helper.filament_present):
+            self.gcode.respond_info(
+                "Unable to unload filament while still in extruder")
+            return
         # i.e. long move that will be fast and iterated using the encoder
         if req_length > self.LONG_MOVE_THRESHOLD: 
             req_length = req_length - buffer_length

@@ -9,7 +9,7 @@ This buffer wheel replaces the existing buffer wheel.
 4) Position the wheel near the buffer exit fitting.
 5) Unclip the end of the filament from the wheel and push it into the ERCF feed tube.
 
-[Download STL](STL/%5Ba%5D_Buffer_Wheel_Easy_Load.stl)
+[Download STL](./STL/[a]_Buffer_Wheel_EZ_Loader.stl)
 
 ## Images
 ![Easy Load Buffer Wheel](./images/ercf_ez_load_001.jpg)

@@ -13,7 +13,7 @@ Carrot Patch spool mounting bracket for the [RepRack filament holder](https://ww
 
 # Version
 * Version for non-covered tube: [Regular Version](RepRackErcfMount.stl)
-* Version for Slip Rod Covered tube: [Slip Rod Compatible Version](RepRackErctMount_SlipRod)
+* Version for Slip Rod Covered tube: [Slip Rod Compatible Version](RepRackErctMount_SlipRod.stl)
 
 # Credit
 * Regular Version: Designed in Fusion 360 by Danny Quist Discord: chamcham#6574

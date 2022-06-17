@@ -261,6 +261,7 @@ class Ercf:
     cmd_ERCF_LOAD_help = "Load filament from ERCF to the toolhead"
     def cmd_ERCF_LOAD(self, gcmd):
         req_length = gcmd.get_float('LENGTH', 0.)
+        num_moves = gcmd.get_int('MOVES', 1)
         iterate = False if req_length == 0. else True
         self.toolhead.wait_moves()
         self._counter.reset_counts()
@@ -289,7 +290,8 @@ class Ercf:
         
         if req_length != 0:
             counter_distance = self._counter.get_distance()
-            self._gear_stepper_move_wait(req_length - counter_distance)
+            for i in range(num_moves):
+                self._gear_stepper_move_wait((req_length/num_moves) - (counter_distance/num_moves))
             counter_distance = self._counter.get_distance()
             
             self.gcode.respond_info(
@@ -331,6 +333,7 @@ class Ercf:
         homing_move = gcmd.get_int('HOMING', 0, minval=0, maxval=1)
         unknown_state = gcmd.get_int('UNKNOWN', 0, minval=0, maxval=1)
         req_length = gcmd.get_float('LENGTH', 1200.)
+        num_moves = gcmd.get_int('MOVES', 1)
         self.toolhead.wait_moves()
         # i.e. long move that will be fast and iterated using the encoder
         if req_length > self.LONG_MOVE_THRESHOLD: 
@@ -340,7 +343,8 @@ class Ercf:
         if unknown_state :
             iterate = False
             self._counter.reset_counts()
-            self._gear_stepper_move_wait(-req_length)
+            for i in range(num_moves):
+                self._gear_stepper_move_wait(-req_length/num_moves)
             homing_move = 1
         if homing_move :
             iterate = False
@@ -356,8 +360,9 @@ class Ercf:
                         return
         else:
             self._counter.reset_counts()
-            self._gear_stepper_move_wait(-req_length)
-        if iterate :
+            for i in range(num_moves):
+                self._gear_stepper_move_wait(-req_length / num_moves)
+        if iterate:
             counter_distance = self._counter.get_distance()
             self.gcode.respond_info(
                         "Unload move done, requested = %.1f, measured = %.1f"

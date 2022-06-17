@@ -11,6 +11,10 @@ Carrot Patch spool mounting bracket for the [RepRack filament holder](https://ww
 3. Attach the Carrot Patch spool with two M3x8 screws
 4. Place the spool holder on the RepRack, optionally secure it with the front mount
 
+# Version
+Regular version for non-covered tubing: [RepRackErcfMount.stl]
+Version with [Slip Rod](https://www.printables.com/fr/model/135700-slip-rod-cover-for-reprack-and-repbox):[RepRackErctMount_SlipRod]
 # Credit
 
 Designed in Fusion 360 by Danny Quist Discord: chamcham#6574
+[Slip Rod](https://www.printables.com/fr/model/135700-slip-rod-cover-for-reprack-and-repbox) compatible version modified in ThinkerCAD by Flisher on Discord

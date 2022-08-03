@@ -11,6 +11,7 @@ Also I found out that StealthBurner has been finally released 5 days ago (at the
 * (3) piece of thin stranded wire (preferably different colors)
 * (1) 6x3 neodymium magnet
 * (1) M3x8 FHSC - stainless steel or brass
+* (1) M3x25 SHCS - stainless steel or brass
 * (1) pneumatic fitting
 
 ## Printing:
@@ -44,7 +45,7 @@ After the fitting is installed it's finally time to install the sensor. Thread t
 ![](./images/install1.jpg)
 
 A few very important notes:
-1. Don't use regular screws - they are magnetic and will interfere with the sensor operation. Use non-magnetic stainless steel or brass screws.
+1. Don't use regular stell screws near the sensor - they are magnetic and will interfere with the sensor operation. Use non-magnetic stainless steel or brass screws.
 2. There is a 0.4 mm wall between the screw and the sensor to prevent sensor damage from the screw. Do not overtighten.
 3. Nylon screw might work too (I haven't tried). In order for nylon screw to work you will need to fix it with a regular screw first - this will establish the threads and break the wall a little bit. Then substitute it for a nylon screw.
 
@@ -53,6 +54,7 @@ Finally route the wires through the hole.
 
 Insert the magnet with the marked side first. This will leave non-marked shiny side sticking out.
 
-Assemble the rest of the extruder as usual.
+Assemble the rest of the extruder as usual except the screw that is closest to the magnet. This screw needs to be non-magnetic as well.
+![](./images/backplate.png)
 
 Enjoy!

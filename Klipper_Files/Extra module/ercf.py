@@ -243,8 +243,8 @@ class Ercf:
                     break
                 if both_in_sync :
                     self.gear_stepper.do_set_position(0.)
-                    self.gear_stepper.do_move(step_length, homing_speed, 
-                                                self.short_moves_accel, False)
+                    self.gear_stepper.do_move(step_length, homing_speed,
+                                              self.toolhead.max_accel, False)
                 pos = self.toolhead.get_position()
                 pos[3] += step_length
                 self.toolhead.manual_move(pos, homing_speed)

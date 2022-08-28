@@ -564,7 +564,7 @@ class Ercf:
     def _handle_pause_timeout(self, eventtime):
         self._log_info("Disable extruder heater")
         self.gcode.run_script_from_command("M104 S0")
-        return self.heater_off_reactor.NEVER
+        return self.reactor.NEVER
 
     def _pause(self):
         self._track_pause_start()

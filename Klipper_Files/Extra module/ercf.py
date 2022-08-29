@@ -790,13 +790,17 @@ class Ercf:
         self._counter.reset_counts()
         
         # Initial unload in sync (ERCF + extruder) for xx mms
+        self._log_trace("Moving the gear and extruder motors in sync %.1f" % self.sync_unload_length) 
         pos = self.toolhead.get_position()
         pos[3] -= self.sync_unload_length
         self.gear_stepper.do_move(-self.sync_unload_length, 30, self.gear_stepper_accel, sync=0)
         self.toolhead.manual_move(pos, 30)
-        self.toolhead.wait_moves()
-        length -= self.sync_unload_length
+        self.toolhead.wait_moves()        
+        counter_distance = self._counter.get_distance()
+        length -= counter_distance
+        self._log_debug("Sync unload move done %.1f / %.1f (diff: %.1f)" % (counter_distance, self.sync_unload_length, counter_distance - self.sync_unload_length))
         
+        self._counter.reset_counts()        
         # initial attempt to unload the filament
         for i in range(self.num_moves):
             self._log_trace("Moving the gear motor %.1f" % (-length / self.num_moves))

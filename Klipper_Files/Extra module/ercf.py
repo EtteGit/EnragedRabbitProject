@@ -306,7 +306,7 @@ class Ercf:
         # if we ever set the angle directly, we are in an unknown state
         # the up/down functions will reset this properly
         self.servo_state = self.SERVO_UNKNOWN_STATE 
-        self.gcode.run_script_from_command("SET_SERVO SERVO=ercf_servo ANGLE=%1.f" % angle)
+        self.gcode.run_script_from_command("SET_SERVO SERVO=ercf_servo ANGLE=%.1f" % angle)
 
     def _servo_off(self):
         self.gcode.run_script_from_command("SET_SERVO SERVO=ercf_servo WIDTH=0.0")
@@ -736,7 +736,7 @@ class Ercf:
             self.toolhead.manual_move(pos, 20)
             self.toolhead.wait_moves()
             moved_length = self._counter.get_distance()
-            self._log_trace("Test extruder move of %1.fmm recorded %1.fmm at the extruder" % (self.encoder_move_step_size, moved_length))
+            self._log_trace("Test extruder move of %.1fmm recorded %.1fmm at the extruder" % (self.encoder_move_step_size, moved_length))
             if (moved_length <= 1.):
                 out_of_extruder = True
                 break
@@ -961,7 +961,7 @@ class Ercf:
     def _home_to_extruder(self, length, step):
         self._servo_down()
 
-        self._log_debug("Homing to extruder with %1.fmm moves" % (step))
+        self._log_debug("Homing to extruder with %.1fmm moves" % (step))
         self.gear_stepper.do_set_position(0.)
         for i in range (int(length / step)):
             pre_move_position = self._counter.get_distance()

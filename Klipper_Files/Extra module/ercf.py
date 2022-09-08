@@ -181,12 +181,14 @@ class Ercf:
 
         for x in range(repeats):
             # Move forward
+            self.toolhead.wait_moves()
             self._counter.reset_counts()
             self._gear_stepper_move_wait(dist, True, speed, accel)
             plus_values.append(self._counter.get_counts())
             self.gcode.respond_info("+ counts =  %.3f"
                         % (self._counter.get_counts()))
             # Move backward
+            self.toolhead.wait_moves()
             self._counter.reset_counts()
             self._gear_stepper_move_wait(-dist, True, speed, accel)
             min_values.append(self._counter.get_counts())
@@ -256,10 +258,12 @@ class Ercf:
 
     cmd_ERCF_RESET_ENCODER_COUNTS_help = "Reset the ERCF encoder counts"
     def cmd_ERCF_RESET_ENCODER_COUNTS(self, gcmd):
+        self.toolhead.wait_moves()
         self._counter.reset_counts() 
 
     cmd_ERCF_BUZZ_GEAR_MOTOR_help = "Buzz the ERCF gear motor"
     def cmd_ERCF_BUZZ_GEAR_MOTOR(self, gcmd):
+        self.toolhead.wait_moves()
         self._counter.reset_counts()
         self._gear_stepper_move_wait(2., False)
         self._gear_stepper_move_wait(-2.)
@@ -357,6 +361,7 @@ class Ercf:
             iterate = False
         if unknown_state :
             iterate = False
+            self.toolhead.wait_moves()
             self._counter.reset_counts()
             for i in range(num_moves):
                 self._gear_stepper_move_wait(-req_length/num_moves)
@@ -364,16 +369,19 @@ class Ercf:
         if homing_move :
             iterate = False
             for step in range( int(req_length / 15.) ):
+                self.toolhead.wait_moves()
                 self._counter.reset_counts()
                 self._gear_stepper_move_wait(-15.)
                 delta = 15. - self._counter.get_distance()
                 # Filament is now out of the encoder
                 if delta >= 3. :
+                    self.toolhead.wait_moves()
                     self._counter.reset_counts()
                     self._gear_stepper_move_wait(-(23. - delta))
                     if self._counter.get_distance() < 5. :
                         return
         else:
+            self.toolhead.wait_moves()
             self._counter.reset_counts()
             for i in range(num_moves):
                 self._gear_stepper_move_wait(-req_length / num_moves)
@@ -400,11 +408,13 @@ class Ercf:
                     return
             # Final move to park position
             for step in range( int(buffer_length / 15.) + 2 ):
+                self.toolhead.wait_moves()
                 self._counter.reset_counts()
                 self._gear_stepper_move_wait(-15.)
                 delta = 15. - self._counter.get_distance()
                 # Filament is now out of the encoder
                 if delta >= 3. :
+                    self.toolhead.wait_moves()
                     self._counter.reset_counts()
                     self._gear_stepper_move_wait(-(23. - delta))
                     if self._counter.get_distance() < 5. :
@@ -520,6 +530,7 @@ class Ercf:
         if length is None :
             self.gcode.respond_info("LENGTH has to be specified")
             return
+        self.toolhead.wait_moves()
         self._counter.reset_counts()
         pos = self.toolhead.get_position()
         pos[3] += length

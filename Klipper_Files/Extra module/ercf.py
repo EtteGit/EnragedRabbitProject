@@ -697,6 +697,7 @@ class Ercf:
     def _check_filament_in_encoder(self):
         self._log_debug("Checking for filament in encoder")
         self._servo_down()
+        self.toolhead.wait_moves()
         self._do_buzz_gear_motor()
         final_encoder_pos = self._counter.get_distance()
         self._log_trace("After buzzing gear motor, encoder read %.1f" % final_encoder_pos)
@@ -1252,6 +1253,7 @@ class Ercf:
         self._counter.reset_counts()
         self._disable_encoder_sensor()
         self._servo_down()
+        self.toolhead.wait_moves()
         self._do_buzz_gear_motor()
         self._servo_up()
         moved = self._counter.get_distance()

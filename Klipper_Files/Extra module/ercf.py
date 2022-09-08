@@ -404,6 +404,7 @@ class Ercf:
         self._select_tool(tool)
         self._servo_down()
         self._set_steps(1.)
+        self.toolhead.wait_moves()
         self._counter.reset_counts()
         encoder_moved = self._load_into_encoder()
         self._load_to_end_of_bowden(load_length-encoder_moved)   
@@ -482,12 +483,14 @@ class Ercf:
 
         for x in range(repeats):
             # Move forward
+            self.toolhead.wait_moves()
             self._counter.reset_counts()
             self._gear_stepper_move_wait(dist, True, speed, accel)
             plus_values.append(self._counter.get_counts())
             self.gcode.respond_info("+ counts =  %.3f"
                         % (self._counter.get_counts()))
             # Move backward
+            self.toolhead.wait_moves()
             self._counter.reset_counts()
             self._gear_stepper_move_wait(-dist, True, speed, accel)
             min_values.append(self._counter.get_counts())
@@ -676,6 +679,7 @@ class Ercf:
         self._servo_up()
         self._log_debug("Checking for filament in extruder")
         # reset the counter and move the extruder backwards by move_size
+        self.toolhead.wait_moves()
         self._counter.reset_counts()
         pos = self.toolhead.get_position()
         pos[3] -= move_size
@@ -732,6 +736,7 @@ class Ercf:
         out_of_extruder = False
         for i in range(3):
             self._log_debug("Testing if filament is still in the extruder - #%d" % i)
+            self.toolhead.wait_moves()
             self._counter.reset_counts()
             pos[3] -= self.encoder_move_step_size
             self.toolhead.manual_move(pos, 20)
@@ -758,6 +763,7 @@ class Ercf:
 
         self._log_debug("Unloading from the encoder")
         for step in range(max_steps):
+            self.toolhead.wait_moves()
             self._counter.reset_counts()
             self._gear_stepper_move_wait(-self.encoder_move_step_size)
             dist_moved = self._counter.get_distance()
@@ -766,6 +772,7 @@ class Ercf:
             if delta >= 3.0:
                 # if there is a large delta here, we are out of the encoder
                 self.loaded_status = self.LOADED_STATUS_UNLOADED
+                self.toolhead.wait_moves()
                 self._counter.reset_counts()
                 self._gear_stepper_move_wait(-(self.parking_distance - delta))
                 if self._counter.get_distance() < 5.0:
@@ -788,6 +795,7 @@ class Ercf:
         self.toolhead.dwell(0.2)        
         self.toolhead.wait_moves()
 
+        self.toolhead.wait_moves()
         self._counter.reset_counts()
         
         # Initial unload in sync (ERCF + extruder) for xx mms
@@ -801,6 +809,7 @@ class Ercf:
         #length -= counter_distance
         #self._log_debug("Sync unload move done %.1f / %.1f (diff: %.1f)" % (counter_distance, self.sync_unload_length, counter_distance - self.sync_unload_length))
         
+        self.toolhead.wait_moves()
         self._counter.reset_counts()        
         # initial attempt to unload the filament
         for i in range(self.num_moves):
@@ -987,6 +996,7 @@ class Ercf:
         self._log_debug("Loading to the nozzle")
 
         self._servo_up()      
+        self.toolhead.wait_moves()
         self._counter.reset_counts()    
         pos = self.toolhead.get_position()
         pos[3] += self.end_of_bowden_to_nozzle
@@ -1250,6 +1260,7 @@ class Ercf:
         self._log_info("Issue on tool %d" % self.tool_selected)
         self._log_info("Checking if this is a clog or a runout...")
 
+        self.toolhead.wait_moves()
         self._counter.reset_counts()
         self._disable_encoder_sensor()
         self._servo_down()

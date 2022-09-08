@@ -125,7 +125,7 @@ class Ercf:
         if self.gear_stepper is None:
             raise config.error(
                 "Manual_stepper gear_stepper must be specified")
-        self.ref_step_dist=self.gear_stepper.rail.steppers[0].get_step_dist()
+        self.ref_step_dist=self.gear_stepper.steppers[0].get_step_dist()
 
     def get_status(self, eventtime):
         encoder_pos = float(self._counter.get_distance())
@@ -421,7 +421,7 @@ class Ercf:
     def cmd_ERCF_SET_STEPS(self, gcmd):
         ratio = gcmd.get_float('RATIO', 1., above=0.)
         new_step_dist = self.ref_step_dist / ratio
-        stepper = self.gear_stepper.rail.steppers[0]
+        stepper = self.gear_stepper.steppers[0]
         if hasattr(stepper, "set_rotation_distance"):
             new_rotation_dist = new_step_dist * stepper.get_rotation_distance()[1]
             stepper.set_rotation_distance(new_rotation_dist)

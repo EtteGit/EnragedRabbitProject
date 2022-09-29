@@ -1266,8 +1266,9 @@ class Ercf:
                 next_check = self.tool_selected + 1
                 next_tool = -1
                 while next_check != self.tool_selected:
-                    if next_check > len(self.selector_offsets):
+                    if next_check > len(self.selector_offsets) - 1:
                         next_check = 0
+                        continue
                     self._log_trace("Checking tool %d to see if it matches the right group" % next_check)
                     if self.endless_spool_groups[next_check] == self.endless_spool_groups[self.tool_selected]:
                         self._log_info("Found next tool in group: %d" % next_check)

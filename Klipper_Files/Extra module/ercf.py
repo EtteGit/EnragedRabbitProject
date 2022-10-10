@@ -3,13 +3,14 @@
 # Copyright (C) 2021  Ette
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
+import copy
 import logging
 import math
-from random import randint
-from . import pulse_counter
-from . import force_move
-import copy
 import time
+from random import randint
+
+from . import force_move, pulse_counter
+
 
 class EncoderCounter:
 
@@ -104,6 +105,7 @@ class Ercf:
         self.enable_clog_detection = config.getint('enable_clog_detection', 1)
         self.enable_endless_spool = config.getint('enable_endless_spool', 0)
         self.endless_spool_groups = config.getintlist('endless_spool_groups')
+        self.toolhead_use_stallguard = config.getint('toolhead_use_stallguard', 0)
 
         if self.enable_endless_spool == 1 and len(self.endless_spool_groups) != len(self.selector_offsets):
             raise config.error(
@@ -212,6 +214,8 @@ class Ercf:
         self.gcode.register_command('ERCF_SELECT_TOOL',
                     self.cmd_ERCF_SELECT_TOOL,
                     desc = self.cmd_ERCF_SELECT_TOOL_help)    
+        self.gcode.register_command('_ERCF_HOME_FILAMENT_TO_EXTRUDER',
+                                    self.cmd__ERCF_HOME_FILAMENT_TO_EXTRUDER)
 
     def handle_connect(self):
         self.toolhead = self.printer.lookup_object('toolhead')
@@ -959,6 +963,15 @@ class Ercf:
             return
 
     def _home_to_extruder(self, length, step):
+        if self.is_paused:
+            return
+        if not self.toolhead_use_stallguard:
+            return self._home_to_extruder_without_stallguard(length, step)
+
+        return self._home_to_extruder_with_stallguard(length)
+
+
+    def _home_to_extruder_without_stallguard(self, length, step):
         self._servo_down()
 
         self._log_debug("Homing to extruder with %1.fmm moves" % (step))
@@ -978,6 +991,47 @@ class Ercf:
 
         self._log_info("Failed to reach extruder after moving %.1fmm, pausing" % length)
         self._pause()
+
+    def _home_to_extruder_with_stallguard(self, max_length):
+        self._servo_down()
+        self.toolhead.dwell(0.2)
+        self.toolhead.wait_moves()
+
+        self._log_debug("Homing to extruder with stallguard, up to %.1fmm" % max_length)
+
+        self.gear_stepper.do_set_position(0.)
+
+        pre_move_position = self._counter.get_distance()
+        self.gear_stepper.do_homing_move(max_length, 5, self.gear_stepper_accel, True, True)
+        self.toolhead.dwell(0.2)
+        self.toolhead.wait_moves()
+        post_move_position = self._counter.get_distance()
+        distance_moved = post_move_position - pre_move_position
+        if distance_moved >= max_length:
+            self._log_info("Failed to reach extruder after moving %.1fmm, pausing" % distance_moved)
+            self._pause()
+        else:
+            self._log_debug("Extruder reached after %.1fmm" % distance_moved)
+            return post_move_position
+
+
+    def cmd__ERCF_HOME_FILAMENT_TO_EXTRUDER(self, params):
+        """Test command to home the filament to the extruder from
+           the end of the fast moves down the reverse bowden.
+           
+           Intended to be used for calibrating the stallguard threshold.
+        """
+        return_after = params.get_int('RETURN_AFTER', 0, minval=0, maxval=1)
+        self.toolhead.wait_moves() 
+        pre_home_position = self._counter.get_distance()
+        position = self._home_to_extruder(self.extruder_homing_max, self.extruder_homing_step)
+        dist_moved = position - pre_home_position
+        self._log_info("Filament homed to extruder, moved %.1fmm" % dist_moved)
+        if return_after:
+            self.gear_stepper.do_set_position(0.)
+            self.gear_stepper.do_move(-dist_moved, 5, self.gear_stepper_accel)
+            self._log_debug("Returning to original position after homing")
+        self._servo_up()
 
     def _load_to_nozzle(self):
         if (self.is_paused):

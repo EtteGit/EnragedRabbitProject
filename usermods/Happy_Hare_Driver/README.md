@@ -179,6 +179,8 @@ If you have installed the optional filament bypass block your can configure its 
 </ul>
 
 Good luck and hopefully a little less *enraged* printing.  You can find me on discord as *moggieuk#6538*
+<br>
+Up-to-date branch found here: https://github.com/moggieuk/ERCF-Software-V3.git
 
   
   ---

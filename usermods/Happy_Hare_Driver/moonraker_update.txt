@@ -1,4 +1,4 @@
-[update_manager ercf]
+[update_manager ercf-happy_hare]
 type: git_repo
 path: ~/ERCF-Software-V3
 origin: https://github.com/moggieuk/ERCF-Software-V3.git

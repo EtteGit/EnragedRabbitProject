@@ -74,7 +74,6 @@ verify_not_root
 check_klipper
 link_ercf_plugin
 copy_config_files
-# Waiting to validate repo before enabling
-#install_update_manager
+install_update_manager
 restart_klipper
 

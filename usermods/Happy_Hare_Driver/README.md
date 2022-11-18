@@ -8,7 +8,7 @@ I love my ERCF and building it was the most fun I've had in many years of the 3D
   <li>Fully implements “EndlessSpool” with new concept of Tool --> Gate mapping.  This allows empty gates to be identified and tool changes subsequent to runout to use the correct filament spool.  It has the added advantage for being able to map gates to tools in case of slicing to spool loading mismatch.
 <li>Measures “spring” in filament after extruder homing for more accurate calibration reference
 <li>Adds servo_up delay making the gear to extruder transition of filament more reliable (maintains pressure)
-<li>Ability to secify empty or disabled tools (gates).
+<li>Ability to specify empty or disabled tools (gates).
 <li>Formal support for the filament bypass block with associated new commands and state if using it.
 <li>Ability to reduce gear current (currently TMC2209 only) during “collision” homing procedure to prevent grinding, etc.
 </ul>
@@ -32,8 +32,24 @@ I love my ERCF and building it was the most fun I've had in many years of the 3D
 <li>Renewed load and unload sequences (to support all build configurations) and effectively combine the sensor and sensorless logic
 </ul>
  
+## Installation
+The module can be installed into a existing Klipper installation with an install script. If existing ercf*.cfg files are found the new versions will be copied with .template extension
+
+    cd ~
+    git clone https://github.com/moggieuk/ERCF-Software-V3.git
+    cd ERCF-Software-V3
+    ./install.sh
+
 <br>
-  To try it out I recommend you save your old configuration and then take the supplied `ercf_parameters.cfg` file as a starting point and edit back some of your known settings.  The replace ercf.py in the Klipper extra folder and restart. 
+or you can save your old configuration and then take the supplied `ercf_parameters.cfg` and `ercf_hardware.cfg` files as a starting point and edit back your known settings.  Then replace ercf.py in the Klipper extras folder and restart Klipper. 
+<br>
+
+## Revision History
+<ul>
+<li> v1.0.0 - Initial Release
+<li> v1.0.3 - Bug fixes from community: Better logging on toolchange (for manual recovery); Advanced config parameters for adjust tolerance used in 'apply_bowden_correction' move; Fixed a couple of silly (non serious) bugs
+</ul>
+
 <br>
 
 ## Summary of new commands:
@@ -61,7 +77,7 @@ Note that if a toolhead sensor is configured it will become the default filament
     ----------------------          ----------------------     -----
     
     1. home_to_extruder=0           toolhead_homing_max=20     This is probably the BEST option and can work with FLEX
-                                    toolhead_homing_step=1     Filament can load close to extruder gear, then is pulled
+                                    toolhead_homing_step=1     Filament. Filament loaded close to extruder gear, then is pulled
                                     sync_load_length=1         through to home on toolhead sensor by synchronized gear
                                                                and extruder motors
     
@@ -87,28 +103,30 @@ Note that if a toolhead sensor is configured it will become the default filament
   
     6. home_to_extruder=1          sync_load_length=0          Same as above but avoids the synchronous move.  Can be
        extruder_homing_max=50                                  reliable with accurate calibration reference length and
-       extruder_homing_step=2                                  accurate encoder
-       extruder_homing_current=50
+       extruder_homing_step=2                                  accurate encoder. Use of 'delay_servo_release' recommended
+       extruder_homing_current=50.                             to keep pressure on the extruder gears for initial load
 
 *Obviously the actual distances shown above may be customized*
   
   **Advanced options**
-When not using synchronous load move the spring tension in the filament held by servo will be leverage to help feed the filament into the extruder. This is controlled with the `delay_servo_release` setting. It defaults to 2mm and is unlikely that it will need to be altered. An option to home to the extruder using stallguard `homing_method=1` is avaiable but not recommended: (i) it is not necessary with current reduction, (ii) it is not readily compatible with EASY-BRD and (iii) is currently incompatible with sensorless selector homing which hijacks the gear endstop configuration.
+When not using synchronous load move the spring tension in the filament held by servo will be leverage to help feed the filament into the extruder. This is controlled with the `delay_servo_release` setting. It defaults to 2mm and is unlikely that it will need to be altered.
+<br>An option to home to the extruder using stallguard `homing_method=1` is avaiable but not recommended: (i) it is not necessary with current reduction, (ii) it is not readily compatible with EASY-BRD and (iii) is currently incompatible with sensorless selector homing which hijacks the gear endstop configuration.
+<br>The 'apply_bowden_correction' setting, if enabled, will make the driver "believe" the encoder reading and make correction moves to bring the filament to the desired end of bowden position. This is useful is you suspect slippage on high speed loading (requires accurate encoder). If disabled, the gear stepper will be solely responsible for filament positioning in bowden (requires minimal friction in feeder tubes). The associated (advanced) 'load_bowden_tolerance' and 'unload_bowden_tolerance' defines the point at which to apply to correction moves. See 'ercf_parameters.cfg' for more details.
   
   **Note about post homing distance**
-Regardless of loading settings above it is important to accurately set `home_to_nozzle` distance.  If you are not homing to the toolhead sensor this will be from the extruder entrance to nozzle.  If you are hoing to toolhead sensor, this will be the (smaller) distance from sensor to nozzle.  For example in my setup of Revo & Clockwork 2, the distance is 72mm or 62mm respectively.
+Regardless of loading settings above it is important to accurately set `home_to_nozzle` distance.  If you are not homing to the toolhead sensor this will be from the extruder entrance to nozzle.  If you are homing to toolhead sensor, this will be the (smaller) distance from sensor to nozzle.  For example in my setup of Revo & Clockwork 2, the distance is 72mm or 62mm respectively.
   
 #### Possible unloading options:
 This is much simplier than loading. The toolhead sensor, if installed, will automatically be leveraged as a checkpoint when extracting from the extruder.
-`sync_unload_length` controls the mm of synchronized movement at start of bowden unloading.  This can make unloading more reliable and will act as what Ette refers to as a "hair pulling" step on unload.  This is an optional step, set to 0 to disable.
+`sync_unload_length` controls the mm of synchronized movement at start of bowden unloading.  This can make unloading more reliable if the tip is caught in the gears and will act as what Ette refers to as a "hair pulling" step on unload.  This is an optional step, set to 0 to disable.
   
 <br>
 
 ### Tool-to-Gate (TTG) mapping and EndlessSpool application
-When changing a tool with the `Tx` command ERCF would by default select the filament at the gate (spool) of the same number.  The mapping built into this *Angry Hare* driver allows you to modify that.  There are 3 primarly use cases for this feature:
+When changing a tool with the `Tx` command the ERCF would by default select the filament at the gate (spool) of the same number.  The mapping built into this *Angry Hare* driver allows you to modify that.  There are 3 primarly use cases for this feature:
 <ol>
-  <li>You have loaded your filaments differently than you sliced gcode file. No problem, just issue the appropriate remapping commands prior to printing
-  <li>Some of "tools" don't have filament and you want to mark them as empty
+  <li>You have loaded your filaments differently than you sliced gcode file... No problem, just issue the appropriate remapping commands prior to printing
+  <li>Some of "tools" don't have filament and you want to mark them as empty to avoid selection.
   <li>Most importantly, for EndlessSpool - when a filament runs out on one gate (spool) then next in the sequence is automatically mapped to the original tool.  It will therefore continue to print on subsequent tool changes.  You can also replace the spool and update the map to indicate avaiablity mid print
 </ol>
 
@@ -170,17 +188,16 @@ If you have installed the optional filament bypass block your can configure its 
 <ul>
   <li>Firstly the importance of a reliable and fairly accurate encoder should not be under estimated. If you cannot get very reliable results from `ERCF_CALIBRATE_ENCODER` then don't proceed with setup - address the encoder problem first. Note that I had really good luck with this https://discord.com/channels/460117602945990666/909743915475816458/1023873076095615036 approach of blackening the encoder wheel and then adjusting the sensor is little *further* away from the gear.
   <li>If using a toolhead sensor, that must be reliable too.  The hall effect based switch is very awkward to get right because of so many variables: strength of magnet, amount of iron in washer, even temperature, therefore I strongly recommend a simple microswitch based detection.  They work first time, every time.
+  <li>The longer the bowden length the more important it is to calibrate correctly (do a couple of times to check for consistency).  Small errors multiply with longer moves!
   <li>Eliminate all points of friction in the filament path.  There is lots written about this already but I found some unusual places where filament was rubbing on plastic and drilling out the path improved things a good deal.
   <li>This version of the driver software both, compensates for, and exploits the spring that is inherently built when homing to the extruder.  The `ERCF_CALIBRATE_SINGLE TOOL=0` (which calibrates the *ercf_calib_ref* length) averages the measurement of multiple passes, measures the spring rebound and considers the configuration options when recommending and setting the ercf_calib_ref length.  If you change basic configuration options it is advisable to rerun this calibration step again.
-  <li>The dreaded "Timer too close" can occur but I believe I have worked around these cases.  The problem is not always an overloaded mcu as often cited -- there are a couple of bugs in Klipper that will delay messages between mcu and host and thus provoke this problem.
-  <li>The servo problem where a servo with move to end position and then jump back can occur due to bug in Klipper just like the original software. The workaroud is increase the same servo "dwell" config options in small increments until the servo works reliably.
-  <li>I added a 'apply_bowden_correction' config option that dictates whether the driver "believes" the encoder or not for long moves.  If enabled, the driver will make correction moves to get the encoder reading correct.  If disabled the gear stepper movement will be applied without slippage detection.  Deatils on when this is useful is documented in 'ercf_parameters'
+  <li>The dreaded "Timer too close" can occur but I believe I have worked around most of these cases.  The problem is not always an overloaded mcu as often cited -- there are a couple of bugs in Klipper that will delay messages between mcu and host and thus provoke this problem.  To minimize you hitting these, I recommend you use a step size of 8 for the gear motor. You don't need high fidelity and this greatly reduces the chance of this error. Also, increasing 'num_moves' also is a workaround.  I'm not experiencing this and have a high speed (200 mm/s) single move load with a step size of 8.
+  <li>The servo problem where a servo with move to end position and then jump back can occur due to bug in Klipper just like the original software. The workaroud is increase the same servo "dwell" config options in small increments until the servo works reliably. Note that this driver will retry the initial servo down movement if it detects slippage thus working around this issue to some extent.
+  <li>I also added a 'apply_bowden_correction' config option that dictates whether the driver "believes" the encoder or not for long moves.  If enabled, the driver will make correction moves to get the encoder reading correct.  If disabled the gear stepper movement will be applied without slippage detection.  Details on when this is useful is documented in 'ercf_parameters'.  If enabled, the options 'load_bowden_tolerance' and 'unload_bowden_tolerance' will set the threshold at which correction is applied.
   <li>I highly recommend Ette's "sensorless selector" option -- it works well and provides for additional recovery abilities if filment gets stuck in encoder preventing selection of a different gate.
 </ul>
 
 Good luck and hopefully a little less *enraged* printing.  You can find me on discord as *moggieuk#6538*
-<br>
-Up-to-date branch found here: https://github.com/moggieuk/ERCF-Software-V3.git
 
   
   ---

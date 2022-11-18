@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2021  Ette
 #
-# Major rewrite and feature update 2022  Moggieuk
+# Major rewrite and feature updates 2022  moggieuk#6538 (discord)
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
 import copy
@@ -105,6 +105,8 @@ class Ercf:
         self.extra_servo_dwell_up = config.getint('extra_servo_dwell_up', 0)
         self.num_moves = config.getint('num_moves', 2, minval=1)
         self.apply_bowden_correction = config.getint('apply_bowden_correction', 1, minval=0, maxval=1)
+        self.load_bowden_tolerance = config.getfloat('load_bowden_tolerance', 4., minval=1., maxval=50.)
+        self.unload_bowden_tolerance = config.getfloat('unload_bowden_tolerance', 4., minval=1., maxval=50.)
         self.parking_distance = config.getfloat('parking_distance', 23., above=15., below=30.)
         self.encoder_move_step_size = config.getfloat('encoder_move_step_size', 15., above=5., below=25.)
         self.selector_offsets = config.getfloatlist('colorselector')
@@ -134,7 +136,7 @@ class Ercf:
         self.enable_endless_spool = config.getint('enable_endless_spool', 0, minval=0, maxval=1)
         self.endless_spool_groups = list(config.getintlist('endless_spool_groups', []))
 
-        self.log_level = config.getint('log_level', 1, minval=0, maxval=3)
+        self.log_level = config.getint('log_level', 1, minval=0, maxval=4)
         self.log_statistics = config.getint('log_statistics', 0, minval=0, maxval=1)
         self.log_visual = config.getint('log_visual', 1, minval=0, maxval=1)
 
@@ -518,7 +520,7 @@ class Ercf:
             load = True
         elif self.sync_load_length > 0:
             msg += "load (%.1fmm)" % (self.sync_load_length)
-            laad = True
+            load = True
         if self.sync_unload_length > 0:
             msg += " and " if load else ""
             msg += "unload (%.1fmm)" % (self.sync_unload_length)
@@ -1125,8 +1127,9 @@ class Ercf:
         return self._counter.get_distance() - initial_encoder_position
     
     # Fast load of filament to approximate end of bowden (without homing)
-    def _load_bowden(self, length, tolerance=3.0):
+    def _load_bowden(self, length):
         self._log_debug("Loading bowden tube")
+        tolerance = self.load_bowden_tolerance
         self.filament_direction = self.DIRECTION_LOAD
         self._servo_down()
         moves = 1 if length < (self._get_calibration_ref() / self.num_moves) else self.num_moves
@@ -1264,7 +1267,8 @@ class Ercf:
             self._servo_down()
             self._log_debug("Moving the gear and extruder motors in sync for %.1fmm" % self.sync_load_length) 
             delta = self._trace_filament_move("Sync load move", self.sync_load_length, speed=10, motor="both")
-            if delta > 2.0:
+            tolerance = max(self.sync_load_length * 0.3, 4.0) # Allow around 30% of slippage because of possible spring in filament
+            if delta > tolerance:
                 raise ErcfError("Too much slippage detected during the sync load to nozzle")
             length -= (self.sync_load_length - delta)
         elif self.home_to_extruder and self.delay_servo_release > 0:
@@ -1409,9 +1413,10 @@ class Ercf:
         self._set_loaded_status(self.LOADED_STATUS_PARTIAL_END_OF_BOWDEN)
 
     # Fast unload of filament from exit of extruder gear (end of bowden) to close to ERCF (but still in encoder)
-    def _unload_bowden(self, length, skip_sync_move=False, tolerance=3.0):
+    def _unload_bowden(self, length, skip_sync_move=False):
         self._log_debug("Unloading bowden tube")
         self.filament_direction = self.DIRECTION_UNLOAD
+        tolerance = self.unload_bowden_tolerance
         self._servo_down()
 
         # Initial short move allows for dealing with (servo) errors. If synchronized it can help with hair pull
@@ -1614,17 +1619,18 @@ class Ercf:
         self._log_debug("%s tool change initiated" % ("In print" if in_print else "Standalone"))
         skip_unload = False
         initial_tool_string = "unknown" if self.tool_selected < 0 else ("T%d" % self.tool_selected)
-        if tool == self.tool_selected:
-            if self.loaded_status == self.LOADED_STATUS_FULL:
-                self._log_info("Tool T%d is already ready" % tool)
+        if tool == self.tool_selected and self.loaded_status == self.LOADED_STATUS_FULL:
+                self._log_always("Tool T%d is already ready" % tool)
                 return
-            elif self.loaded_status == self.LOADED_STATUS_UNLOADED:
-                skip_unload = True
-                msg = "Tool change requested, to T%d" % tool
-                self.gcode.run_script_from_command("M117 -> T%d" % tool)
-            else:
-                msg = "Tool change requested, from %s to T%d" % (initial_tool_string, tool)
-                self.gcode.run_script_from_command("M117 %s -> T%d" % (initial_tool_string, tool))
+        if self.loaded_status == self.LOADED_STATUS_UNLOADED:
+            skip_unload = True
+            msg = "Tool change requested, to T%d" % tool
+            self.gcode.run_script_from_command("M117 -> T%d" % tool)
+        else:
+            msg = "Tool change requested, from %s to T%d" % (initial_tool_string, tool)
+            self.gcode.run_script_from_command("M117 %s -> T%d" % (initial_tool_string, tool))
+        # Important to always inform user in case there is an error and manual recovery is necessary
+        self._log_always(msg)
 
         # Identify the start up use case and make it easy for user
         if not self.is_homed and self.tool_selected == self.TOOL_UNKNOWN:
@@ -1897,6 +1903,8 @@ class Ercf:
         self.sync_unload_length = gcmd.get_float('SYNC_UNLOAD_LENGTH', self.sync_unload_length, minval=0., maxval=100.)
         self.num_moves = gcmd.get_int('NUM_MOVES', self.num_moves, minval=1)
         self.apply_bowden_correction = gcmd.get_int('APPLY_BOWDEN_CORRECTION', self.apply_bowden_correction, minval=0, maxval=1)
+        self.load_bowden_tolerance = gcmd.get_float('LOAD_BOWDEN_TOLERANCE', self.load_bowden_tolerance, minval=1., maxval=50.)
+        self.unload_bowden_tolerance = gcmd.get_float('UNLOAD_BOWDEN_TOLERANCE', self.unload_bowden_tolerance, minval=1., maxval=50.)
         self.home_position_to_nozzle = gcmd.get_float('HOME_POSITION_TO_NOZZLE', self.home_position_to_nozzle, minval=25.)
         self.variables['ercf_calib_ref'] = gcmd.get_float('ERCF_CALIB_REF', self.variables['ercf_calib_ref'], minval=10.)
         msg = "long_moves_speed = %.1f" % self.long_moves_speed
@@ -1912,6 +1920,8 @@ class Ercf:
         msg += "\nsync_unload_length = %.1f" % self.sync_unload_length
         msg += "\nnum_moves = %d" % self.num_moves
         msg += "\napply_bowden_correction = %d" % self.apply_bowden_correction
+        msg += "\nload_bowden_tolerance = %d" % self.load_bowden_tolerance
+        msg += "\nunload_bowden_tolerance = %d" % self.unload_bowden_tolerance
         msg += "\nhome_position_to_nozzle = %.1f" % self.home_position_to_nozzle
         msg += "\nercf_calib_ref = %.1f" % self.variables['ercf_calib_ref']
         self._log_info(msg)
@@ -1924,7 +1934,7 @@ class Ercf:
     def _handle_runout(self):
         if self._check_is_paused(): return
         if self.tool_selected < 0:
-            raise ErcfError("Issue on an unknown or bypass tool - manual intervention is required")
+            raise ErcfError("Filament runout or movement issue on an unknown or bypass tool - manual intervention is required")
 
         self._log_info("Issue on tool T%d" % self.tool_selected)
         self._log_debug("Checking if this is a clog or a runout...")

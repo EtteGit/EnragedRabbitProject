@@ -52,6 +52,9 @@ copy_template_files() {
                 s/{sensorless_selector}/${sensorless_selector}/g; \
                 s/{clog_detection}/${clog_detection}/g; \
                 s/{endless_spool}/${endless_spool}/g; \
+                s/{servo_up_angle}/${servo_up_angle}/g; \
+                s/{servo_down_angle}/${servo_down_angle}/g; \
+                s/{calibration_bowden_length}/${calibration_bowden_length}/g; \
                     " > ${dest}
 	fi
     done
@@ -130,7 +133,7 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
             echo
             case $yn in
                 y)
-	            echo "IMPORTANT: Set the J6 jumper pins to 1-2 and 3-4, i.e. [..][..].  MAKE A NOTE NOW!!"
+	            echo "IMPORTANT: Set the J6 jumper pins to 2-3 and 4-5, i.e. .[..][..]  MAKE A NOTE NOW!!"
 	            sensorless_selector=1
                     ;;
                 n)
@@ -138,6 +141,21 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
 	            sensorless_selector=0
                     ;;
 	    esac
+
+            echo
+	    echo "Using default MG-90S servo? (If you answer no, will setup for Savox SH0255MG - you can change later)"
+            yn=$(prompt_yn "MG-90S Servo?")
+            case $yn in
+                y)
+	            servo_up_angle=30
+	            servo_down_angle=140
+                    ;;
+                n)
+	            servo_up_angle=140
+	            servo_down_angle=30
+                    ;;
+	    esac
+
 	    echo
             echo "Clog detection? This uses the ERCF encoder movement to detect clogs and can call your filament runout logic"
             yn=$(prompt_yn "Enable clog detection")
@@ -149,6 +167,7 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
                     clog_detection=0
                     ;;
 	    esac
+
 	    echo
             echo "Endless spool? This uses filament runout detection to automate switching to new spool without interruption"
             yn=$(prompt_yn "Enable Endless Spool")
@@ -159,12 +178,27 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
                 n)
                     ;;
 	    esac
+
+	    echo
+	    echo "What is the length of your reverse bowden tube in mm?"
+            echo "(This is just to speed up calibration and needs to be approximately right but not longer than the real length)"
+            while true; do
+                read -p "Reverse bowden length in mm? " calibration_bowden_length
+		if ! [ "${calibration_bowden_length}" -ge 1 ] 2> /dev/null ;then
+                    echo "Positive integer value only"
+                else
+                    break
+                fi
+            done
+	    echo 
+
 	    echo
 	    echo "NOTES:"
 	    echo " * Toolhead sensor use will be dependent on your manual configuration"
 	    echo " What still needs to be done:"
 	    echo " * Find and set your serial_id for EASY-BRD mcu"
 	    echo " * Adjust motor speeds and current if using NEMA 17 motors"
+	    echo " * Adjust motor direction with '!' on pin if necessary. No way to know here"
 	    echo " * Adjust your config for loading and unloading preferences"
 	    echo " * Adjust distances (bowden length & extruder) for you particular setup"
 	    echo 
@@ -178,6 +212,7 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
 	    easy_brd=0
 	    ;;
     esac
+
     copy_template_files
     echo
 fi

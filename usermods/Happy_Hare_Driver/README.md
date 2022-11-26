@@ -1,10 +1,4 @@
 # ERCF-Software-V3 "Happy Hare"
-
-Note this is a copy of the standalone Github repo which is problably the best place to clone from (that way, moonraker update-manager can work as well as other things.  I'm keeping this copy up-to-date until we decide how to best package this driver - as a mod or as mainline.
-<br>
-Standalone repo: https://github.com/moggieuk/ERCF-Software-V3
-<br>
---
 I love my ERCF and building it was the most fun I've had in many years of the 3D-printing hobby. Whilst the design is brilliant I found a few problems with the software and wanted to add some features and improve user friendliness.  This became especially true after the separation of functionality with the introduction of the "sensorless" branch. I liked the new python implementation as a Klipper plug-in but wanted to leverage my (very reliable) toolhead sensor.  So I rewrote the software behind ERCF - it still has the structure and much of the code of the original but, more significantly, it has many new features, integrates the toolhead sensor and sensorless options.  I'm calling it the **"Happy Hare"** release or v3.
 
 ## Major new features:
@@ -17,6 +11,7 @@ I love my ERCF and building it was the most fun I've had in many years of the 3D
 <li>Ability to specify empty or disabled tools (gates).
 <li>Formal support for the filament bypass block with associated new commands and state if using it.
 <li>Ability to reduce gear current (currently TMC2209 only) during “collision” homing procedure to prevent grinding, etc.
+<li>Convenience filament preload function and check gate feature to ensure filaments are all ready before print
 </ul>
 
 ## Other features:
@@ -27,6 +22,7 @@ I love my ERCF and building it was the most fun I've had in many years of the 3D
 <li>Workarond to some of the ways to provoke Klipper “Timer too close” errors (although there are definitely bugs in the Klipper firmware)
 <li>More reliable “in-print” detection so tool change command “Tx” g-code can be used anytime and the user does not need to resort to “ERCF_CHANGE_TOOL_STANDALONE”
 <li>New LOG_LEVEL=4 for developer use.  BTW This is useful in seeing the exact stepper movements
+<li>New "TEST" commands to help diagnose issues with encoder
 <li>Experimental logic to use stallguard filament homing (Caveat: not easy to setup using EASY-BRD and not compatible with sensorless selector homing option)
 </ul>
   
@@ -39,8 +35,9 @@ I love my ERCF and building it was the most fun I've had in many years of the 3D
 </ul>
  
 <br>
+  
 ## Installation
-The module can be installed into a existing Klipper installation with the install script.
+The module can be installed into a existing Klipper installation with the install script. Once installed it will be added to Moonraker update-manager to easy updates like other Klipper plugins:
 
     cd ~
     git clone https://github.com/moggieuk/ERCF-Software-V3.git
@@ -48,15 +45,20 @@ The module can be installed into a existing Klipper installation with the instal
 
     ./install.sh -i
 
-<br>
 The `-i` option will bring up some interactive prompts to aid setting some confusing parameters on EASY-BRD (like sensorless selector homing setup). If not run with the `-i` flag the new template .cfg files will not be installed.  Note that if existing ercf*.cfg files are found the old versions will be moved to <file>.00 extension instead so as not to overwrite an existing configuration.  If you still choose not to install the new ercf*.cfg files automatically be sure to examine them closely and compare to the supplied templates - some options have changed!
+<br>
+
+Be sure to read my [notes on Encoder problems](doc/ENCODER.md) - the better the encoder the better this software will work.
 
 <br>
+  
 ## Revision History
 <ul>
-<li> v1.0.0 - Initial Release
+<li> v1.0.0 - Initial Beta Release
 <li> v1.0.3 - Bug fixes from community: Better logging on toolchange (for manual recovery); Advanced config parameters for adjust tolerance used in 'apply_bowden_correction' move; Fixed a couple of silly (non serious) bugs
 <li> v1.1.0 - New commands: ERCF_PRELOAD & ERCF_CHECK_GATES ; Automatic setting of clog detection distance in calibration routine ; Eliminated DETAIL flags for status reporting (detail always present); New interactive install script to help EASY-BRD setup; Bug fixes
+<li> v1.1.1 - Fixes for over zealous tolerance checks on bowen loading; Fix for unloading to far if apply_bowden_correction is active; new test command: ERCF_TEST_TRACKING; Fixed slicer based tool load issue; Improved install.sh -i to include servo and calib bowden length
+<li> v1.1.2 - Fixes for over zealous tolerance checks on bowen loading; Fix for unloading to far if apply_bowden_correction is active; new test command: ERCF_TEST_TRACKING; Fixed slicer based tool load issue; Improved install.sh -i to include servo and calib bowden length; Better detection of malfunctioning toolhead sensor
 </ul>
 
 <br>
@@ -64,13 +66,14 @@ The `-i` option will bring up some interactive prompts to aid setting some confu
 ## Summary of new commands:
   | Commmand | Description | Parameters |
   | -------- | ----------- | ---------- |
-  | ERCF_STATUS | Report on ERCF state, cababilities and Tool-to-Gate map | None |
+  | ERCF_STATUS | Report on ERCF state, cababilities and Tool-to-Gate map | SHOWCONFIG=\[0\|1\] Whether or not to describe the machine configuration in status message |
   | ERCF_TEST_CONFIG | Dump / Change essential load/unload config options at runtime | Many. Best to run ERCF_TEST_CONFIG without options to report all parameters that can be specified |
   | ERCF_DISPLAY_TTG_MAP | Displays the current Tool - to - Gate mapping (can be used all the time but generally designed for EndlessSpool  | None |
   | ERCF_REMAP_TTG | Reconfiguration of the Tool - to - Gate (TTG) map.  Can also set gates as empty! | TOOL=\[0..n\] <br>GATE=\[0..n\] Maps specified tool to this gate (multiple tools can point to same gate) <br>AVAILABLE=\[0\|1\]  Marks gate as available or empty |
   | ERCF_SELECT_BYPASS | Unload and select the bypass selector position if configured | None |
   | ERCF_LOAD_BYPASS | Does the extruder loading part of the load sequence - designed for bypass filament loading | None |
   | ERCF_TEST_HOME_TO_EXTRUDER | For calibrating extruder homing - TMC current setting, etc. | RETURN=\[0\|1\] Whether to return the filament to the approximate starting position after homing - good for repeated testing |
+  | ERCF_TEST_TRACKING | Simple visual test to see how encoder tracks with gear motor | DIRECTION=\[-1\|1\] Direction to perform the test <br>STEP=\[0.5..20\] Size of individual steps<br>Defaults to load direction and 1mm step size |
   | ERCF_PRELOAD | Preloads filament at the specified gate| GATE=\[0..n\] The specific gate to preload. If ommitted the currently selected gate can be loaded |
   | ERCF_CHECK_GATES | Inspect the gate(s) and mark availability | GATE=\[0..n\] The specific gate to check. If ommitted all gates will be checked (the default) |
   
@@ -122,7 +125,7 @@ Note that if a toolhead sensor is configured it will become the default filament
   **Advanced options**
 When not using synchronous load move the spring tension in the filament held by servo will be leverage to help feed the filament into the extruder. This is controlled with the `delay_servo_release` setting. It defaults to 2mm and is unlikely that it will need to be altered.
 <br>An option to home to the extruder using stallguard `homing_method=1` is avaiable but not recommended: (i) it is not necessary with current reduction, (ii) it is not readily compatible with EASY-BRD and (iii) is currently incompatible with sensorless selector homing which hijacks the gear endstop configuration.
-<br>The 'apply_bowden_correction' setting, if enabled, will make the driver "believe" the encoder reading and make correction moves to bring the filament to the desired end of bowden position. This is useful is you suspect slippage on high speed loading (requires accurate encoder). If disabled, the gear stepper will be solely responsible for filament positioning in bowden (requires minimal friction in feeder tubes). The associated (advanced) 'load_bowden_tolerance' and 'unload_bowden_tolerance' defines the point at which to apply to correction moves. See 'ercf_parameters.cfg' for more details.
+<br>The 'apply_bowden_correction' setting, if enabled, will make the driver "believe" the encoder reading and make correction moves to bring the filament to the desired end of bowden position. This is useful is you suspect slippage on high speed loading (requires accurate encoder). If disabled, the gear stepper will be solely responsible for filament positioning in bowden (requires minimal friction in feeder tubes). The associated (advanced) 'load_bowden_tolerance' defines the point at which to apply to correction moves. See 'ercf_parameters.cfg' for more details.
   
   **Note about post homing distance**
 Regardless of loading settings above it is important to accurately set `home_to_nozzle` distance.  If you are not homing to the toolhead sensor this will be from the extruder entrance to nozzle.  If you are homing to toolhead sensor, this will be the (smaller) distance from sensor to nozzle.  For example in my setup of Revo & Clockwork 2, the distance is 72mm or 62mm respectively.
@@ -196,8 +199,8 @@ If you have installed the optional filament bypass block your can configure its 
 <img src="doc/My Voron 2.4 and ERCF.jpg" width="400" alt="My Setup">
 
 ### Some setup notes based on my learnings:
+Firstly the importance of a reliable and fairly accurate encoder should not be under estimated. If you cannot get very reliable results from `ERCF_CALIBRATE_ENCODER` then don't proceed with setup - address the encoder problem first. Because the encoder is the HEART of ERCF I [created a how-to](doc/ENCODER.md) on fixing many possible problems with encoder.
 <ul>
-  <li>Firstly the importance of a reliable and fairly accurate encoder should not be under estimated. If you cannot get very reliable results from `ERCF_CALIBRATE_ENCODER` then don't proceed with setup - address the encoder problem first. Note that I had really good luck with this https://discord.com/channels/460117602945990666/909743915475816458/1023873076095615036 approach of blackening the encoder wheel and then adjusting the sensor is little *further* away from the gear.
   <li>If using a toolhead sensor, that must be reliable too.  The hall effect based switch is very awkward to get right because of so many variables: strength of magnet, amount of iron in washer, even temperature, therefore I strongly recommend a simple microswitch based detection.  They work first time, every time.
   <li>The longer the bowden length the more important it is to calibrate correctly (do a couple of times to check for consistency).  Small errors multiply with longer moves!
   <li>Eliminate all points of friction in the filament path.  There is lots written about this already but I found some unusual places where filament was rubbing on plastic and drilling out the path improved things a good deal.
@@ -223,7 +226,7 @@ Good luck and hopefully a little less *enraged* printing.  You can find me on di
   | ERCF_RESET_STATS | Reset the ERCF statistics | None |
   | ERCF_DUMP_STATS | Dump the ERCF statistics | None |
   | ERCF_SET_LOG_LEVEL | Sets the logging level and turning on/off of visual loading/unloading sequence | LEVEL=\[1..4\] <br>VISUAL=\[0\|1\] Whether to also show visual representation |
-  | ERCF_STATUS | Report on ERCF state, cababilities and Tool-to-Gate map | None |
+  | ERCF_STATUS | Report on ERCF state, cababilities and Tool-to-Gate map | SHOWCONFIG=\[0|1\] Whether or not to show the machine configuration in status message |
   | ERCF_DISPLAY_ENCODER_POS | Displays the current value of the ERCF encoder | None |
   <br>
 
@@ -271,6 +274,7 @@ Good luck and hopefully a little less *enraged* printing.  You can find me on di
   | (ERCF_LOAD) | Identical to ERCF_TEST_LOAD | |
   | ERCF_TEST_UNLOAD | Move the ERCF gear | LENGTH=..[100] Lenght of filament to be unloaded <br>UNKNOWN=\[0\|1\] Whether the state of the extruder is known. Generally 0 for standalone use, 1 simulates call as if it was from slicer when tip has already been formed |
   | ERCF_TEST_HOME_TO_EXTRUDER | For calibrating extruder homing - TMC current setting, etc. | RETURN=\[0\|1\] Whether to return the filament to the approximate starting position after homing - good for repeated testing |
+  | ERCF_TEST_TRACKING | Simple visual test to see how encoder tracks with gear motor | DIRECTION=\[-1\|1\] Direction to perform the test <br>STEP=\[0.5..20\] Size of individual steps<br>Defaults to load direction and 1mm step size |
   | ERCF_TEST_CONFIG | Dump / Change essential load/unload config options at runtime | Many. Best to run ERCF_TEST_CONFIG without options to report all parameters than can be specified |
   <br>
 

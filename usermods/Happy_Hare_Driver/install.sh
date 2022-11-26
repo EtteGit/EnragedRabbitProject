@@ -33,7 +33,7 @@ copy_template_files() {
 	    mv ${dest} ${dest}.00
         fi
 	# A little simplistic at the moment...
-        if [ "${file}" == "ercf_hardware.cfg" ]; then
+        if [ "${file}" = "ercf_hardware.cfg" ]; then
             if [ "${sensorless_selector}" -eq 1 ]; then
                 cat ${SRCDIR}/${file} | sed -e "\
                     s/^#endstop_pin: \^ercf:PB9/!endstop_pin: \^ercf:PB9/; \
@@ -42,10 +42,13 @@ copy_template_files() {
 		    s/^endstop_pin: \^ercf:PB9/#endstop_pin: \^ercf:PB9/; \
                     s/^!endstop_pin: \^ercf:PB9/endstop_pin: \^ercf:PB9/; \
                     s/^#endstop_pin: tmc2209_selector_stepper/endstop_pin: tmc2209_selector_stepper/; \
+                    s/{serial}/${serial}/; \
                         " > ${dest}
             else
                 # This is the default template config
-                cp ${SRCDIR}/${file} ${dest}
+                cat ${SRCDIR}/${file} | sed -e "\
+                    s/{serial}/${serial}/; \
+                        " > ${dest}
             fi
 	else
             cat ${SRCDIR}/${file} | sed -e "\
@@ -127,6 +130,25 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
     yn=$(prompt_yn "Are you using the EASY-BRD")
     case $yn in
         y)
+            serial=""
+            echo
+            for line in `ls /dev/serial/by-id | grep "Klipper_samd21"`; do
+                echo "Is this your EASY-BRD serial port?"
+		yn=$(prompt_yn "/dev/serial/by-id/${line}")
+                case $yn in
+                    y)
+                        serial="\/dev\/serial\/by-id\/${line}"
+			break
+                        ;;
+                    n)
+                        ;;
+                esac
+            done
+            if [ "${serial}" = "" ]; then
+                echo "Couldn't find your serial port, but no worries - I'll configure the default and you can manually change later as per the docs"
+                serial='\/dev\/ttyACM1 # Config guess. Run ls -l \/dev\/serial\/by-id and set manually'
+	    fi
+
             echo
             echo "Sensorless selector operation? This allows for additional selector recovery steps but disables the 'extra' input on the EASY-BRD."
             yn=$(prompt_yn "Enable sensorless selector operation")
@@ -196,7 +218,7 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
 	    echo "NOTES:"
 	    echo " * Toolhead sensor use will be dependent on your manual configuration"
 	    echo " What still needs to be done:"
-	    echo " * Find and set your serial_id for EASY-BRD mcu"
+	    echo " * Find and set your serial ID for EASY-BRD mcu"
 	    echo " * Adjust motor speeds and current if using NEMA 17 motors"
 	    echo " * Adjust motor direction with '!' on pin if necessary. No way to know here"
 	    echo " * Adjust your config for loading and unloading preferences"

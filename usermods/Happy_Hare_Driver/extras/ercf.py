@@ -255,6 +255,9 @@ class Ercf:
         self.gcode.register_command('ERCF_PAUSE',
                     self.cmd_ERCF_PAUSE,
                     desc = self.cmd_ERCF_PAUSE_help)
+        self.gcode.register_command('ERCF_RECOVER',
+                    self.cmd_ERCF_RECOVER,
+                    desc = self.cmd_ERCF_RECOVER_help)
 
 	# User Testing
         self.gcode.register_command('ERCF_TEST_GRIP', 
@@ -844,7 +847,8 @@ class Ercf:
     
             self._log_always("Before calibration measured length = %.6f" % old_result)
             self._log_always("Resulting resolution for the encoder = %.6f" % resolution)
-            self._log_always("After calibration measured length = %.6f" % new_result)        
+            self._log_always("After calibration measured length = %.6f" % new_result)
+            self._log_always("IMPORTANT: Don't forget to update 'encoder_resolution: %.6f' in your ercf_parameters.cfg file and restart Klipper" % resolution)
         except ErcfError as ee:
             self._pause(ee.message)
         finally:
@@ -957,7 +961,7 @@ class Ercf:
         status = self.printer.lookup_object("idle_timeout").get_status(self.printer.get_reactor().monotonic())
         if self.printer.lookup_object("pause_resume").is_paused:
             status["state"] = "Paused"
-        return status["state"] == "Printing" and status["printing_time"] > 3.0
+        return status["state"] == "Printing" and status["printing_time"] > 2.0
 
     def _set_above_min_temp(self):
         if not self.printer.lookup_object("extruder").heater.can_extrude :
@@ -1357,6 +1361,7 @@ class Ercf:
 
             if check_state or self.loaded_status == self.LOADED_STATUS_UNKNOWN:
                 # Let's determine where filament is and reset state before continuing
+                self._log_debug("Unknown filament postion, recovering state...")
                 self._recover_loaded_state()
             else:
                 self._display_visual_state()
@@ -1401,7 +1406,6 @@ class Ercf:
 
     # This is a recovery routine to determine the most conservate location of the filament for unload purposes
     def _recover_loaded_state(self):
-        self._log_debug("Unknown filament postion, recovering state...")
         toolhead_sensor_state = self._check_toolhead_sensor()
         if toolhead_sensor_state == -1:     # Not installed
             if self._check_filament_in_encoder():
@@ -1722,6 +1726,7 @@ class Ercf:
             self._move_selector_sensorless(self.bypass_offset)
         else:
             self._selector_stepper_move_wait(self.bypass_offset)
+        self.filament_direction = self.DIRECTION_LOAD
         self._set_tool_selected(self.TOOL_BYPASS)
         self._log_info("Bypass enabled")
 
@@ -1776,23 +1781,15 @@ class Ercf:
         except ErcfError as ee:
             self._pause(ee.message)
 
-    cmd_ERCF_CHANGE_TOOL_help = "Perform a tool swap during a print"
+    cmd_ERCF_CHANGE_TOOL_help = "Perform a tool swap"
     def cmd_ERCF_CHANGE_TOOL(self, gcmd):
         if self._check_is_paused(): return
         if self._check_in_bypass(): return
         tool = gcmd.get_int('TOOL', 0, minval=0, maxval=len(self.selector_offsets)-1)
+        standalone = gcmd.get_int('STANDALONE', 0, minval=0, maxval=1)
+        in_print = self._is_in_print() and (standalone == 0)
         try:
-            self._change_tool(tool, self._is_in_print())
-        except ErcfError as ee:
-            self._pause(ee.message)
-
-    cmd_ERCF_CHANGE_TOOL_STANDALONE_help = "Perform a tool swap outside of a print"
-    def cmd_ERCF_CHANGE_TOOL_STANDALONE(self, gcmd):
-        if self._check_is_paused(): return
-        if self._check_in_bypass(): return
-        tool = gcmd.get_int('TOOL', 0, minval=0, maxval=len(self.selector_offsets)-1)
-        try:
-            self._change_tool(tool, in_print=False)
+            self._change_tool(tool, in_print)
         except ErcfError as ee:
             self._pause(ee.message)
 
@@ -1828,6 +1825,12 @@ class Ercf:
     def cmd_ERCF_PAUSE(self, gcmd):
         if self._check_is_paused(): return
         self._pause("Pause macro was directly called")
+
+    cmd_ERCF_RECOVER_help = "Recover the filament location state after manual intervention/movement"
+    def cmd_ERCF_RECOVER(self, gcmd):
+        if self._check_is_paused(): return
+        self._log_info("Recovering filament position...")
+        self._recover_loaded_state()
 
 
 ### GOCDE COMMMANDS INTENDED FOR TESTING #####################################

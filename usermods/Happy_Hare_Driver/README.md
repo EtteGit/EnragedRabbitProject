@@ -59,6 +59,7 @@ Be sure to read my [notes on Encoder problems](doc/ENCODER.md) - the better the 
 <li> v1.1.0 - New commands: ERCF_PRELOAD & ERCF_CHECK_GATES ; Automatic setting of clog detection distance in calibration routine ; Eliminated DETAIL flags for status reporting (detail always present); New interactive install script to help EASY-BRD setup; Bug fixes
 <li> v1.1.1 - Fixes for over zealous tolerance checks on bowen loading; Fix for unloading to far if apply_bowden_correction is active; new test command: ERCF_TEST_TRACKING; Fixed slicer based tool load issue; Improved install.sh -i to include servo and calib bowden length
 <li> v1.1.2 - Fixes for over zealous tolerance checks on bowen loading; Fix for unloading to far if apply_bowden_correction is active; new test command: ERCF_TEST_TRACKING; Fixed slicer based tool load issue; Improved install.sh -i to include servo and calib bowden length; Better detection of malfunctioning toolhead sensor
+<li> v1.1.3 - Added ERCF_RECOVER command to re-establish filament position after manual intervention and filament movement. Not necessary if you use ERCF commands to correct problem but useful to call prior to RESUME; Much improved install.sh to cover toolhead sensor and auto restart moonraker on first time install
 </ul>
 
 <br>
@@ -76,6 +77,7 @@ Be sure to read my [notes on Encoder problems](doc/ENCODER.md) - the better the 
   | ERCF_TEST_TRACKING | Simple visual test to see how encoder tracks with gear motor | DIRECTION=\[-1\|1\] Direction to perform the test <br>STEP=\[0.5..20\] Size of individual steps<br>Defaults to load direction and 1mm step size |
   | ERCF_PRELOAD | Preloads filament at the specified gate| GATE=\[0..n\] The specific gate to preload. If ommitted the currently selected gate can be loaded |
   | ERCF_CHECK_GATES | Inspect the gate(s) and mark availability | GATE=\[0..n\] The specific gate to check. If ommitted all gates will be checked (the default) |
+  | ERCF_RECOVER | Recover filament position. Useful to call prior to RESUME if you intervene/manipulate filament by hand | None |
   
   Note that some existing commands have been enhanced a little.  See the [command reference](#ercf-command-reference) at the end of this page.
   
@@ -106,7 +108,7 @@ Note that if a toolhead sensor is configured it will become the default filament
     
     4. home_to_extruder=1           toolhead_homing_max=20     A bit redundant to home twice but allows for reliable filament
        extruder_homing_max=50       toolhead_homing_step=1     pickup by extruder, accurate toolhead homing and avoids 
-       extruder_homing_step=2       sync_load_length=0         problem problems with sync move (Timer too close)
+       extruder_homing_step=2       sync_load_length=0         possible problems with sync move (like Timer too close)
        extruder_homing_current=50
 
 #### Possible loading options WITHOUT toolhead sensor:
@@ -257,10 +259,11 @@ Good luck and hopefully a little less *enraged* printing.  You can find me on di
   | ERCF_SELECT_TOOL | Selects the gate associated with the specified tool | TOOL=\[0..n\] The tool to be selected (technically the gate associated with this tool will be selected) |
   | ERCF_SELECT_BYPASS | Unload and select the bypass selector position if configured | None |
   | ERCF_LOAD_BYPASS | Does the extruder loading part of the load sequence - designed for bypass filament loading | None |
-  | ERCF_CHANGE_TOOL | Perform a tool swap (generally called from 'Tx' macros) | TOOL=\[0..n\] |
-  | (ERCF_CHANGE_TOOL_STANDALONE) | Deprecated, 'ERCF_TOOL_CHANGE' can handle. Was: Perform a tool swap outside of print | TOOL=\[0..n\] |
+  | ERCF_CHANGE_TOOL | Perform a tool swap (generally called from 'Tx' macros) | TOOL=\[0..n\] <br>STANDALONE=\[0\|1\] Optional to force standalone logic (tip forming) |
+  | ERCF_CHANGE_TOOL_STANDALONE | Deprecated. Perform tool swap outside of a print. Use 'ERCF_TOOL_CHANGE STANDALONE=1' | TOOL=\[0..n\] |
   | ERCF_EJECT | Eject filament and park it in the ERCF | None |
   | ERCF_PAUSE | Pause the current print and lock the ERCF operations | None |
+  | ERCF_RECOVER | Recover filament position (state). Useful to call prior to RESUME if you intervene/manipulate filament by hand | None |
   <br>
 
   ## User Testing

@@ -227,7 +227,7 @@ class Ercf:
         if self.gear_stepper is None:
             raise config.error(
                 "Manual_stepper gear_stepper must be specified")
-        self.ref_step_dist=self.gear_stepper.rail.steppers[0].get_step_dist()
+        self.ref_step_dist=self.gear_stepper.rail.get_step_dist()
         self.variables = self.printer.lookup_object('save_variables').allVariables
         self.encoder_sensor = self.printer.lookup_object("filament_motion_sensor encoder_sensor")
         self.printer.register_event_handler("klippy:ready", self._setup_heater_off_reactor)
@@ -1093,7 +1093,7 @@ class Ercf:
     def _set_steps(self, ratio=1.):
         self._log_trace("Setting ERCF gear motor step ratio to %.1f" % ratio)
         new_step_dist = self.ref_step_dist / ratio
-        stepper = self.gear_stepper.rail.steppers[0]
+        stepper = self.gear_stepper.rail
         if hasattr(stepper, "set_rotation_distance"):
             new_rotation_dist = new_step_dist * stepper.get_rotation_distance()[1]
             stepper.set_rotation_distance(new_rotation_dist)

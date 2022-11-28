@@ -720,7 +720,7 @@ class Ercf:
                 self._log_always("All %d attempts at homing failed. ERCF needs some adjustments!" % repeats)
         except ErcfError as ee:
             # Add some more context to the error and re-raise
-            raise ErcfError("Calibration of reference tool T0 failed. Aborting, because:\n%s" % ee.message)
+            raise ErcfError("Calibration of reference tool T0 failed. Aborting, because:\n%s" % str(ee))
         finally:
             self._servo_up()
 
@@ -745,7 +745,7 @@ class Ercf:
             self._set_loaded_status(self.LOADED_STATUS_UNLOADED)
         except ErcfError as ee:
             # Add some more context to the error and re-raise
-            raise ErcfError("Calibration for tool T%d failed. Aborting, because: %s" % (tool, ee.message))
+            raise ErcfError("Calibration for tool T%d failed. Aborting, because: %s" % (tool, str(ee)))
         finally:
             self._servo_up()
 
@@ -777,7 +777,7 @@ class Ercf:
             self._log_always("End of the complete auto calibration!")
             self._log_always("Please reload the firmware for the calibration to be active!")
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
         finally:
             self.calibrating = False
 
@@ -795,7 +795,7 @@ class Ercf:
             else:
                 self._calculate_calibration_ratio(tool)
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
         finally:
             self.calibrating = False
 
@@ -850,7 +850,7 @@ class Ercf:
             self._log_always("After calibration measured length = %.6f" % new_result)
             self._log_always("IMPORTANT: Don't forget to update 'encoder_resolution: %.6f' in your ercf_parameters.cfg file and restart Klipper" % resolution)
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
         finally:
             self._set_loaded_status(self.LOADED_STATUS_PARTIAL_IN_BOWDEN)
             self.calibrating = False
@@ -880,7 +880,7 @@ class Ercf:
             else:
                 self._log_always("Selector position = %.1fmm" % traveled_position)
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
         finally:
             self.calibrating = False
 
@@ -1623,7 +1623,7 @@ class Ercf:
                     self._unload_sequence(self._get_calibration_ref(), check_state=True)
                 except ErcfError as ee:
                     # Add some more context to the error and re-raise
-                    raise ErcfError("Selector recovery failed because: %s" % (tool, ee.message))
+                    raise ErcfError("Selector recovery failed because: %s" % (tool, str(ee)))
                 
                 # Ok, now check if selector can now reach proper target
                 self._home_selector()
@@ -1768,7 +1768,7 @@ class Ercf:
         try:
             self._home(tool)
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
 
     cmd_ERCF_SELECT_TOOL_help = "Select the specified tool"
     def cmd_ERCF_SELECT_TOOL(self, gcmd):
@@ -1779,7 +1779,7 @@ class Ercf:
         try:
             self._select_tool(tool)
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
 
     cmd_ERCF_CHANGE_TOOL_help = "Perform a tool swap"
     def cmd_ERCF_CHANGE_TOOL(self, gcmd):
@@ -1791,7 +1791,7 @@ class Ercf:
         try:
             self._change_tool(tool, in_print)
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
 
     cmd_ERCF_EJECT_help = "Eject filament and park it in the ERCF"
     def cmd_ERCF_EJECT(self, gcmd):
@@ -1800,7 +1800,7 @@ class Ercf:
         try:
             self._unload_tool()
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
 
     cmd_ERCF_SELECT_BYPASS_help = "Select the filament bypass"
     def cmd_ERCF_SELECT_BYPASS(self, gcmd):
@@ -1810,7 +1810,7 @@ class Ercf:
         try:
             self._select_bypass()
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
 
     cmd_ERCF_LOAD_BYPASS_help = "Smart load of filament from end of bowden (gears) to nozzle. Designed for bypass usage"
     def cmd_ERCF_LOAD_BYPASS(self, gcmd):
@@ -1819,7 +1819,7 @@ class Ercf:
         try:
             self._load_extruder(True, skip_sync_move=True)
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
 
     cmd_ERCF_PAUSE_help = "Pause the current print and lock the ERCF operations"
     def cmd_ERCF_PAUSE(self, gcmd):
@@ -1888,7 +1888,7 @@ class Ercf:
                             self._unload_tool()
             self._select_tool(0)
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
 
     cmd_ERCF_TEST_LOAD_help = "Test loading of filament from ERCF to the extruder"
     def cmd_ERCF_TEST_LOAD(self, gcmd):
@@ -1900,7 +1900,7 @@ class Ercf:
         try:
             self._load_sequence(length, no_extruder=True)
         except ErcfError as ee:
-            self._log_always("Load test failed: %s" % ee.message)
+            self._log_always("Load test failed: %s" % str(ee))
 
     cmd_ERCF_TEST_TRACKING_help = "Test the tracking of gear feed and encoder sensing"
     def cmd_ERCF_TEST_TRACKING(self, gcmd):
@@ -1929,7 +1929,7 @@ class Ercf:
                 self._log_info("Gear/Encoder : %05.2f / %05.2f mm %s" % (moved, measured, drift))
             self._unload_tool()
         except ErcfError as ee:
-            self._log_always("Tracking test failed: %s" % ee.message)
+            self._log_always("Tracking test failed: %s" % str(ee))
     
     cmd_ERCF_TEST_UNLOAD_help = "For testing for fine control of filament unloading and parking it in the ERCF"
     def cmd_ERCF_TEST_UNLOAD(self, gcmd):
@@ -1940,7 +1940,7 @@ class Ercf:
         try:
             self._unload_sequence(length, check_state=unknown_state, skip_sync_move=True)
         except ErcfError as ee:
-            self._log_always("Unload test failed: %s" % ee.message)
+            self._log_always("Unload test failed: %s" % str(ee))
 
     cmd_ERCF_TEST_HOME_TO_EXTRUDER_help = "Test homing the filament to the extruder from the end of the bowden. Intended to be used for calibrating the current reduction or stallguard threshold"
     def cmd_ERCF_TEST_HOME_TO_EXTRUDER(self, params):
@@ -1960,7 +1960,7 @@ class Ercf:
                 self._log_debug("Returning filament %.1fmm to original position after homing test" % -(measured_movement - spring))
                 self._gear_stepper_move_wait(-(measured_movement - spring))
         except ErcfError as ee:
-            self._log_always("Homing test failed: %s" % ee.message)
+            self._log_always("Homing test failed: %s" % str(ee))
 
     cmd_ERCF_TEST_CONFIG_help = "Runtime adjustment of ERCF configuration for testing purposes"
     def cmd_ERCF_TEST_CONFIG(self, gcmd):
@@ -2103,7 +2103,7 @@ class Ercf:
         try:
             self._handle_runout()
         except ErcfError as ee:
-            self._pause(ee.message)
+            self._pause(str(ee))
 
     cmd_ERCF_DISPLAY_TTG_MAP_help = "Display the current mapping of tools to ERCF gate positions. Used with endless spool"
     def cmd_ERCF_DISPLAY_TTG_MAP(self, gcmd):
@@ -2147,7 +2147,7 @@ class Ercf:
                     self._unload_encoder(self.unload_buffer)
                 except ErcfError as ee:
                     self._servo_up()
-                    self._log_always("Failure during gate check: %s" % ee.message)
+                    self._log_always("Failure during gate check: %s" % str(ee))
                     return
             except ErcfError as ee:
                 self._log_info("Gate #%d - filament not detected. Marked empty" % i)
@@ -2176,12 +2176,12 @@ class Ercf:
                     return
                 except ErcfError as ee:
                     # Exception just means filament is not loaded yet, so continue
-                    self._log_debug("Exception on encoder load move: %s" % ee.message)
+                    self._log_debug("Exception on encoder load move: %s" % str(ee))
                     pass
             self.gate_status[gate] = self.GATE_EMPTY
             self._log_always("Filament not detected in gate #%d" % gate)
         except ErcfError as ee:
-            self._log_always("Filament preload for gate #%d failed: %s" % (gate, ee.message))
+            self._log_always("Filament preload for gate #%d failed: %s" % (gate, str(ee)))
         finally:
             self._servo_up()
 

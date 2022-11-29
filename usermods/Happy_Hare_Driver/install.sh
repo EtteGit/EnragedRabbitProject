@@ -39,8 +39,9 @@ copy_template_files() {
     echo "Copying configuration files to ${KLIPPER_CONFIG_HOME}"
     for file in `cd ${SRCDIR} ; ls *.cfg`; do
         dest=${KLIPPER_CONFIG_HOME}/${file}
+
         if test -f $dest; then
-            echo "Config file ${dest} already exists - moving old to ${file}.00"
+            echo "Config file ${dest} already exists - moving old one to ${file}.00"
 	    mv ${dest} ${dest}.00
         fi
 
@@ -242,11 +243,15 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
 	    esac
 
 	    echo
-            echo "Endless spool? This uses filament runout detection to automate switching to new spool without interruption"
-            yn=$(prompt_yn "Enable Endless Spool")
+            echo "EndlessSpool? This uses filament runout detection to automate switching to new spool without interruption"
+            yn=$(prompt_yn "Enable EndlessSpool")
             case $yn in
                 y)
                     endless_spool=1
+                    if [ "${clog_detection}" -eq 0 ]; then
+                        echo "    NOTE: I've re-enabled clog detection which is necessary for EndlessSpool to function"
+                        clog_detection=1
+                    fi
                     ;;
                 n)
                     ;;
@@ -267,9 +272,7 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
 
 	    echo
 	    echo "NOTES:"
-	    echo " * Toolhead sensor use will be dependent on your manual configuration"
 	    echo " What still needs to be done:"
-	    echo " * Find and set your serial ID for EASY-BRD mcu"
 	    echo " * Adjust motor speeds and current if using NEMA 17 motors"
 	    echo " * Adjust motor direction with '!' on pin if necessary. No way to know here"
 	    echo " * Adjust your config for loading and unloading preferences"

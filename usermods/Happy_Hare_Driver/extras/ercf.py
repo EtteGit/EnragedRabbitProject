@@ -164,6 +164,7 @@ class Ercf:
         # State variables
         self.is_paused = False
         self.is_homed = False
+        self.need_to_recover_state = False
         self.paused_extruder_temp = 0.
         self.tool_selected = self.TOOL_UNKNOWN
         self.gate_selected = self.GATE_UNKNOWN  # We keep record of gate selected incase user messes with mapping in print
@@ -658,7 +659,7 @@ class Ercf:
         self._log_always("Calibrating reference tool T0")
         self._select_tool(0)
         self._set_steps(1.)
-        reference_sum = spring_sum = 0.
+        reference_sum = spring_max = 0.
         successes = 0
         try:
             for i in range(repeats):
@@ -693,7 +694,7 @@ class Ercf:
                     msg += "\nCalibration reference based on this pass is %.1f" % reference
                     self._log_always(msg)
                     reference_sum += reference
-                    spring_sum += spring
+                    spring_max = max(spring, spring_max)
                     successes += 1
                 else:
                     # No spring means we haven't reliably homed
@@ -706,16 +707,16 @@ class Ercf:
     
             if successes > 0:
                 average_reference = reference_sum / successes
-                average_spring_detection_length = (spring_sum / successes) * 2.0
+                spring_based_detection_length = spring_max * 2.0
                 self._log_always("Recommended calibration reference based on current configuration options is %.1f" % average_reference)
                 self.gcode.run_script_from_command("SAVE_VARIABLE VARIABLE=ercf_calib_ref VALUE=%.1f" % average_reference)
-                self.gcode.run_script_from_command("SAVE_VARIABLE VARIABLE=ercf_calib_clog_length VALUE=%.1f" % average_spring_detection_length)
+                self.gcode.run_script_from_command("SAVE_VARIABLE VARIABLE=ercf_calib_clog_length VALUE=%.1f" % spring_based_detection_length)
                 self.gcode.run_script_from_command("SAVE_VARIABLE VARIABLE=ercf_calib_0 VALUE=1.0")  
                 self.gcode.run_script_from_command("SAVE_VARIABLE VARIABLE=ercf_calib_version VALUE=3")
                 if self.enable_clog_detection:
-                    self._log_always("Recommended setting for 'detection_length' in the encoder_sensor config is: %.1f" % average_spring_detection_length)
+                    self._log_always("Automatically setting clog 'detection_length' to: %.1f" % spring_based_detection_length)
                 else:
-                    self._log_always("If you choose to enable the clog detection option the recommended setting for 'detection_length' is: %.1f" % average_spring_detection_length)
+                    self._log_always("If you choose to enable the clog detection option the recommended setting for 'detection_length' is: %.1f" % spring_based_detection_length)
             else:
                 self._log_always("All %d attempts at homing failed. ERCF needs some adjustments!" % repeats)
         except ErcfError as ee:
@@ -761,10 +762,11 @@ class Ercf:
 
 ### CALIBRATION GCODE COMMANDS
 
-    cmd_ERCF_CALIBRATE_help = "Complete calibration of all ERCF Tools"
+    cmd_ERCF_CALIBRATE_help = "Complete calibration of all ERCF tools"
     def cmd_ERCF_CALIBRATE(self, gcmd):
         if self._check_is_paused(): return
         try:
+            self._reset_ttg_mapping()
             self.calibrating = True
             self._disable_encoder_sensor()
             self._log_always("Start the complete auto calibration...")
@@ -775,25 +777,27 @@ class Ercf:
                 else:
                     self._calculate_calibration_ratio(i)
             self._log_always("End of the complete auto calibration!")
-            self._log_always("Please reload the firmware for the calibration to be active!")
+            self._log_always("Please restart Klipper for the calibration to become active!")
         except ErcfError as ee:
             self._pause(str(ee))
         finally:
             self.calibrating = False
 
-    cmd_ERCF_CALIBRATE_SINGLE_help = "Calibration of a single ERCF Tool"
+    cmd_ERCF_CALIBRATE_SINGLE_help = "Calibration of a single ERCF tool"
     def cmd_ERCF_CALIBRATE_SINGLE(self, gcmd):
         if self._check_is_paused(): return
         tool = gcmd.get_int('TOOL', 0, minval=0, maxval=len(self.selector_offsets)-1)
         repeats = gcmd.get_int('REPEATS', 3, minval=1, maxval=10)
         validate = gcmd.get_int('VALIDATE', 0, minval=0, maxval=1)
         try:
+            self._reset_ttg_mapping() # Because historically the parameter is TOOL
             self.calibrating = True
             self._home(tool)
             if tool == 0 and not validate:
                 self._calculate_calibration_ref(repeats=repeats)
             else:
                 self._calculate_calibration_ratio(tool)
+            self._log_always("Please restart Klipper for the calibration change to become active!")
         except ErcfError as ee:
             self._pause(str(ee))
         finally:
@@ -855,15 +859,16 @@ class Ercf:
             self._set_loaded_status(self.LOADED_STATUS_PARTIAL_IN_BOWDEN)
             self.calibrating = False
 
-    cmd_ERCF_CALIB_SELECTOR_help = "Calibration of the selector position for a defined Tool"
+    cmd_ERCF_CALIB_SELECTOR_help = "Calibration of the selector position for a defined gate"
     def cmd_ERCF_CALIB_SELECTOR(self, gcmd):
         if self._check_is_paused(): return
-        tool = gcmd.get_int('TOOL', 0, minval=0, maxval=len(self.selector_offsets)-1)
+        #gate = gcmd.get_int('GATE', 0, minval=0, maxval=len(self.selector_offsets)-1) # This is more descriptively correct
+        gate = gcmd.get_int('TOOL', 0, minval=0, maxval=len(self.selector_offsets)-1)
         try:
             self.calibrating = True
             self._servo_up()
-            move_length = 10. + tool*21 + (tool//3)*5 + (self.bypass_offset > 0)
-            self._log_always("Measuring the selector position for tool %d" % tool)
+            move_length = 10. + gate*21 + (gate//3)*5 + (self.bypass_offset > 0)
+            self._log_always("Measuring the selector position for gate %d" % gate)
             self.selector_stepper.do_set_position(0.)
             init_position = self.selector_stepper.steppers[0].get_mcu_position()
             self._selector_stepper_move_wait(-move_length, speed=60, homing_move=1)
@@ -876,7 +881,7 @@ class Ercf:
             else:
                 homed = self.selector_endstop.query_endstop(self.toolhead.get_last_move_time())
             if not homed:
-                self._log_always("Selector didn't find home postion. Are you sure you selected the correct tool?")
+                self._log_always("Selector didn't find home position. Are you sure you selected the correct gate?")
             else:
                 self._log_always("Selector position = %.1fmm" % traveled_position)
         except ErcfError as ee:
@@ -924,6 +929,7 @@ class Ercf:
         self._counter.reset_counts()    # Encoder 0000
         self._track_pause_end()
         self.is_paused = False
+        self.need_to_recover_state = True
 
     def _disable_encoder_sensor(self):
         self._log_trace("Disable encoder sensor")
@@ -935,7 +941,7 @@ class Ercf:
 
     def _check_is_paused(self):
         if self.is_paused:
-            self._log_always("ERCF is currently paused.  Please use ERCF_UNLOCK")
+            self._log_always("ERCF is currently locked/paused.  Please use ERCF_UNLOCK")
             return True
         return False
 
@@ -1406,6 +1412,7 @@ class Ercf:
 
     # This is a recovery routine to determine the most conservate location of the filament for unload purposes
     def _recover_loaded_state(self):
+        self.need_to_recover_state = False
         toolhead_sensor_state = self._check_toolhead_sensor()
         if toolhead_sensor_state == -1:     # Not installed
             if self._check_filament_in_encoder():
@@ -1553,7 +1560,7 @@ class Ercf:
 
     def _home(self, tool = -1):
         if self._get_calibration_version() != 3:
-            self._log_info("You are running an old calibration version.\nIt is strongly recommended that you rerun 'ERCF_CALIBRATE_SINGLE TOOL=0' to generate an updated calibration value")
+            self._log_info("You are running an old calibration version.\nIt is strongly recommended that you rerun 'ERCF_CALIBRATE_SINGLE TOOL=0' to generate updated calibration values")
 
         self._log_info("Homing ERCF...")
         if self.is_paused:
@@ -1737,7 +1744,7 @@ class Ercf:
                 self._set_steps(1.)
             else:
                 self.gate_selected = self._tool_to_gate(tool)
-                self._set_steps(self._get_gate_ratio(self._tool_to_gate(tool)))
+                self._set_steps(self._get_gate_ratio(self.gate_selected))
             if not silent:
                 self._display_visual_state()
 
@@ -1788,6 +1795,8 @@ class Ercf:
         tool = gcmd.get_int('TOOL', 0, minval=0, maxval=len(self.selector_offsets)-1)
         standalone = gcmd.get_int('STANDALONE', 0, minval=0, maxval=1)
         in_print = self._is_in_print() and (standalone == 0)
+        if in_print and self.need_to_recover_state:
+            self._recover_loaded_state()
         try:
             self._change_tool(tool, in_print)
         except ErcfError as ee:
@@ -1981,7 +1990,7 @@ class Ercf:
         self.load_bowden_tolerance = gcmd.get_float('LOAD_BOWDEN_TOLERANCE', self.load_bowden_tolerance, minval=1., maxval=50.)
         self.home_position_to_nozzle = gcmd.get_float('HOME_POSITION_TO_NOZZLE', self.home_position_to_nozzle, minval=25.)
         self.variables['ercf_calib_ref'] = gcmd.get_float('ERCF_CALIB_REF', self.variables['ercf_calib_ref'], minval=10.)
-        self.variables['ercf_calib_clog_length'] = gcmd.get_float('ERCF_CALIB_CLOG_LENGTH', self.variables['ercf_calib_clog_length'], minval=1., maxval=100.)
+        self.encoder_sensor.detection_length = self.variables['ercf_calib_clog_length'] = gcmd.get_float('ERCF_CALIB_CLOG_LENGTH', self._get_calibration_clog_length(), minval=1., maxval=100.)
         msg = "long_moves_speed = %.1f" % self.long_moves_speed
         msg += "\nshort_moves_speed = %.1f" % self.short_moves_speed
         msg += "\nhome_to_extruder = %d" % self.home_to_extruder
@@ -2078,7 +2087,7 @@ class Ercf:
                 es = ", EndlessSpool Grp %s: " % group
                 prefix = ""
                 for j in range(num_tools):
-                    check = (j+ i + self.gate_selected) % num_tools
+                    check = (j + i) % num_tools
                     if self.endless_spool_groups[check] == group:
                         es += "%s%s%d" % (prefix, ("#" if self.gate_status[check] == self.GATE_AVAILABLE else "e"), check)
                         prefix = " > "
@@ -2095,6 +2104,13 @@ class Ercf:
     def _remap_tool(self, tool, gate, available):
         self.tool_to_gate_map[tool] = gate
         self.gate_status[gate] = available
+
+    def _reset_ttg_mapping(self):
+        self._log_debug("Resetting TTG map")
+        for i in range(len(self.selector_offsets)):
+            self.tool_to_gate_map[i] = i
+            self.gate_status[i] = self.GATE_AVAILABLE
+        self._unselect_tool()
 
 ### GOCDE COMMMANDS FOR RUNOUT and GATE LOGIC ##################################
 
@@ -2120,13 +2136,10 @@ class Ercf:
 
     cmd_ERCF_RESET_TTG_MAP_help = "Reset the tool to gate map"
     def cmd_ERCF_RESET_TTG_MAP(self, gcmd):
-        for i in range(len(self.selector_offsets)):
-            self.tool_to_gate_map[i] = i
-            self.gate_status[i] = self.GATE_AVAILABLE
-        self._unselect_tool()
+        self._reset_ttg_mapping()
         self._log_info(self._tool_to_gate_map_to_human_string())
 
-    cmd_ERCF_CHECK_GATES_help = "Inspects gates and marks availability"
+    cmd_ERCF_CHECK_GATES_help = "Automatically inspects gate(s), parks filament and marks availability"
     def cmd_ERCF_CHECK_GATES(self, gcmd):
         if self._check_not_homed(): return
         gate = gcmd.get_int('GATE', -1, minval=0, maxval=len(self.selector_offsets)-1)

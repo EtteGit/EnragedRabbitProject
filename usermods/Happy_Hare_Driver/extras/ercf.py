@@ -118,8 +118,8 @@ class Ercf:
         self.min_temp_extruder = config.getfloat('min_temp_extruder', 180.)
         self.calibration_bowden_length = config.getfloat('calibration_bowden_length')
         self.unload_buffer = config.getfloat('unload_buffer', 30., above=15.)
-        self.home_to_extruder = config.getint('home_to_extruder', 1, minval=0, maxval=1)
-        self.homing_method = config.getint('homing_method', 0, minval=0, maxval=1) # EXPERIMENTAL, not exposed yet
+        self.home_to_extruder = config.getint('home_to_extruder', 0, minval=0, maxval=1)
+        self.homing_method = config.getint('homing_method', 0, minval=0, maxval=1)
         self.extruder_homing_max = config.getfloat('extruder_homing_max', 50., above=20.)
         self.extruder_homing_step = config.getfloat('extruder_homing_step', 2., above=0.5, maxval=5.)
         self.extruder_homing_current = config.getint('extruder_homing_current', 50, minval=0, maxval=100)
@@ -141,16 +141,19 @@ class Ercf:
         self.log_statistics = config.getint('log_statistics', 0, minval=0, maxval=1)
         self.log_visual = config.getint('log_visual', 1, minval=0, maxval=1)
 
+        if self.enable_endless_spool == 1 and self.enable_clog_detection == 0:
+            raise self.config.error("EndlessSpool mode requires clog detection to be enabled")
+
         if len(self.endless_spool_groups) > 0:
             if self.enable_endless_spool == 1 and len(self.endless_spool_groups) != len(self.selector_offsets):
-                raise config.error("EndlessSpool mode requires that the endless_spool_groups parameter is set with the same number of values as the number of selectors")
+                raise self.config.error("EndlessSpool mode requires that the endless_spool_groups parameter is set with the same number of values as the number of selectors")
         else:
             for i in range(len(self.selector_offsets)):
                 self.endless_spool_groups.append(i)
 
         if len(self.gate_status) > 0:
             if not len(self.gate_status) == len(self.selector_offsets):
-                raise config.error("Gate status map has different number of values than the number of selectors")
+                raise self.config.error("Gate status map has different number of values than the number of selectors")
         else:
             for i in range(len(self.selector_offsets)):
                 self.gate_status.append(self.GATE_AVAILABLE)
@@ -319,19 +322,25 @@ class Ercf:
             if stepper_name == 'manual_stepper gear_stepper':
                 self.gear_stepper = manual_stepper[1]
         if self.selector_stepper is None:
-            raise config.error("Manual_stepper selector_stepper must be specified")
+            raise self.config.error("Manual_stepper selector_stepper must be specified")
         if self.gear_stepper is None:
-            raise config.error("Manual_stepper gear_stepper must be specified")
+            raise self.config.error("Manual_stepper gear_stepper must be specified")
 
         # Get sensors
-        self.encoder_sensor = self.printer.lookup_object("filament_motion_sensor encoder_sensor")
+        try:
+            self.encoder_sensor = self.printer.lookup_object("filament_motion_sensor encoder_sensor")
+        except:
+            self.encoder_sensor = None
+            if self.enable_clog_detection:
+                raise self.config.error("Clog detection / EndlessSpool is enabled but no 'encoder_sensor' configured")
+
         try:
             self.toolhead_sensor = self.printer.lookup_object("filament_switch_sensor toolhead_sensor")
         except:
             self.toolhead_sensor = None
             if not self.home_to_extruder:
                 self.home_to_extruder = 1
-                self._log_debug("No toolhead sensor detected, forcing home_to_extruder")
+                self._log_debug("No toolhead sensor detected, forcing 'home_to_extruder: 1'")
 
         # Get endstops
         self.query_endstops = self.printer.lookup_object('query_endstops')
@@ -355,11 +364,11 @@ class Ercf:
 
         self.ref_step_dist=self.gear_stepper.steppers[0].get_step_dist()
         self.variables = self.printer.lookup_object('save_variables').allVariables
+        # Override motion sensor runout detection_length based on calibration
+        self.encoder_sensor.detection_length = self._get_calibration_clog_length()
         self.printer.register_event_handler("klippy:ready", self.handle_ready)
         self._reset_statistics()
 
-        # Override motion sensor runout detection_length based on calibration
-        self.encoder_sensor.detection_length = self._get_calibration_clog_length()
 
     def handle_ready(self):
         self._setup_heater_off_reactor()
@@ -463,33 +472,33 @@ class Ercf:
         if self.tool_selected == self.TOOL_BYPASS:
             visual = "ERCF BYPASS -------- [encoder] -------------->>"
         elif self.loaded_status == self.LOADED_STATUS_UNKNOWN:
-            visual = "ERCF [T%s] ..... [encoder] .............. [extruder] .....%s.... [nozzle] UNKNOWN" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] ..... [encoder] .............. [extruder] ....%s.... [nozzle] UNKNOWN" % (tool_str, sensor_str)
         elif self.loaded_status == self.LOADED_STATUS_UNLOADED:
-            visual = "ERCF [T%s] >.... [encoder] .............. [extruder] .....%s.... [nozzle] UNLOADED" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] >.... [encoder] .............. [extruder] ....%s.... [nozzle] UNLOADED" % (tool_str, sensor_str)
             visual += counter_str
         elif self.loaded_status == self.LOADED_STATUS_PARTIAL_BEFORE_ENCODER:
-            visual = "ERCF [T%s] >>>.. [encoder] .............. [extruder] .....%s.... [nozzle]" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] >>>.. [encoder] .............. [extruder] ....%s.... [nozzle]" % (tool_str, sensor_str)
             visual += counter_str
         elif self.loaded_status == self.LOADED_STATUS_PARTIAL_PAST_ENCODER:
-            visual = "ERCF [T%s] >>>>> [encoder] >>>........... [extruder] .....%s.... [nozzle]" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] >>>>> [encoder] >>>........... [extruder] ....%s.... [nozzle]" % (tool_str, sensor_str)
             visual += counter_str
         elif self.loaded_status == self.LOADED_STATUS_PARTIAL_IN_BOWDEN:
-            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>...... [extruder] .....%s.... [nozzle]" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>...... [extruder] ....%s.... [nozzle]" % (tool_str, sensor_str)
             visual += counter_str
         elif self.loaded_status == self.LOADED_STATUS_PARTIAL_END_OF_BOWDEN:
-            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>> [extruder] .....%s.... [nozzle]" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>> [extruder] ....%s.... [nozzle]" % (tool_str, sensor_str)
             visual += counter_str
         elif self.loaded_status == self.LOADED_STATUS_PARTIAL_HOMED_EXTRUDER:
-            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>| [extruder] .....%s.... [nozzle]" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>| [extruder] ....%s.... [nozzle]" % (tool_str, sensor_str)
             visual += counter_str
         elif self.loaded_status == self.LOADED_STATUS_PARTIAL_HOMED_SENSOR:
-            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>> [extruder] >>>>|%s.... [nozzle]" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>> [extruder] >>>|%s.... [nozzle]" % (tool_str, sensor_str)
             visual += counter_str
         elif self.loaded_status == self.LOADED_STATUS_PARTIAL_IN_EXTRUDER:
-            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>> [extruder] >>>>.%s.... [nozzle]" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>> [extruder] >>>>%s>... [nozzle]" % (tool_str, sensor_str)
             visual += counter_str
         elif self.loaded_status == self.LOADED_STATUS_FULL:
-            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>> [extruder] >>>>>%s>>>> [nozzle] LOADED" % (tool_str, sensor_str)
+            visual = "ERCF [T%s] >>>>> [encoder] >>>>>>>>>>>>>> [extruder] >>>>%s>>>> [nozzle] LOADED" % (tool_str, sensor_str)
             visual += counter_str
         if self.filament_direction == self.DIRECTION_UNLOAD:
             visual = visual.replace(">", "<")
@@ -932,12 +941,14 @@ class Ercf:
         self.need_to_recover_state = True
 
     def _disable_encoder_sensor(self):
-        self._log_trace("Disable encoder sensor")
-        self.encoder_sensor.runout_helper.sensor_enabled = 0
+        if self.encoder_sensor:
+            self._log_trace("Disable encoder sensor")
+            self.encoder_sensor.runout_helper.sensor_enabled = 0
 
     def _enable_encoder_sensor(self):
-        self._log_trace("Enable encoder sensor")
-        self.encoder_sensor.runout_helper.sensor_enabled = 1
+        if self.encoder_sensor:
+            self._log_trace("Enable encoder sensor")
+            self.encoder_sensor.runout_helper.sensor_enabled = 1
 
     def _check_is_paused(self):
         if self.is_paused:
@@ -1018,7 +1029,7 @@ class Ercf:
             self.toolhead.wait_moves()
 
     # Convenience wrapper around a gear and extrduer motor move that tracks measured movement and create trace log entry
-    def _trace_filament_move(self, trace_str, distance, speed=None, accel=None, motor="gear"):
+    def _trace_filament_move(self, trace_str, distance, speed=None, accel=None, motor="gear", homing=False):
         if speed == None:
             speed = self.gear_stepper.velocity
         start = self._counter.get_distance()
@@ -1034,8 +1045,12 @@ class Ercf:
             self.toolhead.wait_moves()
             self.toolhead.set_position(pos)                         # Force subsequent incremental move
         elif motor == "gear":
-            self._gear_stepper_move_wait(distance, accel=accel)
-        else:   # extruder only
+            if homing:
+                # Special case to support stallguard homing of filament to extruder
+                self.gear_stepper.do_homing_move(distance, speed, accel, True, False)
+            else:
+                self._gear_stepper_move_wait(distance, accel=accel)
+        else:   # Extruder only
             self._log_stepper("EXTRUDER: dist=%.1f, speed=%d" % (distance, speed))
             pos = self.toolhead.get_position()
             pos[3] += distance
@@ -1256,17 +1271,17 @@ class Ercf:
             self._log_info("Warning: A lot of slippage was detected whilst homing to extruder, you may want to reduce 'extruder_homing_current' and/or ensure a good grip on filament by gear drive")
         return homed, measured_movement
 
-    # EXPERIMENTAL Note: not compatible with EASY BRD / or with sensorless selector homing (endstop contention)
+    # EXPERIMENTAL Note: not readily compatible with EASY BRD / or with sensorless selector homing (endstop contention)
     def _home_to_extruder_with_stallguard(self, max_length):
         self._log_debug("Homing to extruder gear with stallguard, up to %.1fmm" % max_length)
+
         initial_encoder_position = self._counter.get_distance()
-        self._selector_stepper_move_wait(max_length, speed=5, homing_move=1)
+        homed = False
+        delta = self._trace_filament_move("Homing filament", max_length, speed=5, accel=self.gear_homing_accel, homing=True)
         measured_movement = self._counter.get_distance() - initial_encoder_position
         if measured_movement < max_length:
             self._log_debug("Extruder entrance reached after %.1fmm" % measured_movement)
             homed = True
-        else:
-            homed = False
         return homed, measured_movement
 
     # This optional step aligns (homes) filament with the toolhead sensor. Returns measured movement

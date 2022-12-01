@@ -60,6 +60,8 @@ Be sure to read my [notes on Encoder problems](doc/ENCODER.md) - the better the 
 <li> v1.1.1 - Fixes for over zealous tolerance checks on bowen loading; Fix for unloading to far if apply_bowden_correction is active; new test command: ERCF_TEST_TRACKING; Fixed slicer based tool load issue; Improved install.sh -i to include servo and calib bowden length
 <li> v1.1.2 - Fixes for over zealous tolerance checks on bowen loading; Fix for unloading to far if apply_bowden_correction is active; new test command: ERCF_TEST_TRACKING; Fixed slicer based tool load issue; Improved install.sh -i to include servo and calib bowden length; Better detection of malfunctioning toolhead sensor
 <li> v1.1.3 - Added ERCF_RECOVER command to re-establish filament position after manual intervention and filament movement. Not necessary if you use ERCF commands to correct problem but useful to call prior to RESUME; Much improved install.sh to cover toolhead sensor and auto restart moonraker on first time install
+<li> v1.1.4 - Change to automatic clog detection length based on community feedback
+<li> v1.1.5 - Further install.sh improvements - no longer need filament_sensor defined or duplicate pin override if not using clog detection; Cleaned up documentation in template config file; Stallguard filament homing should now be possible (have to configure by hand); Additional configuration checks on startup; minor useabilty improvements based on community feedback
 </ul>
 
 <br>

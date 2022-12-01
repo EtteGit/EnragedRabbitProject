@@ -46,13 +46,18 @@ copy_template_files() {
         fi
 
         if [ "${easy_brd}" -eq 1 ]; then
-    	    # A little simplistic at the moment...
             if [ "${file}" = "ercf_hardware.cfg" ]; then
                 if [ "${toolhead_sensor}" -eq 1 ]; then
-                    magic_str="## ERCF Toolhead sensor"
+                    magic_str1="## ERCF Toolhead sensor"
                 else
-                    magic_str="NO TOOLHEAD"
-    	    fi
+                    magic_str1="NO TOOLHEAD"
+		fi
+                if [ "${clog_detection}" -eq 1 ]; then
+                    magic_str2="## ERCF Clog detection"
+                else
+                    magic_str2="NO CLOG"
+		fi
+
             if [ "${sensorless_selector}" -eq 1 ]; then
                 cat ${SRCDIR}/${file} | sed -e "\
                     s/^#endstop_pin: \^ercf:PB9/!endstop_pin: \^ercf:PB9/; \
@@ -63,14 +68,16 @@ copy_template_files() {
                     s/^#endstop_pin: tmc2209_selector_stepper/endstop_pin: tmc2209_selector_stepper/; \
                     s/{serial}/${serial}/; \
                     s/{toolhead_sensor_pin}/${toolhead_sensor_pin}/; \
-                    /^${magic_str}/,$ s/^#//; \
+                    /^${magic_str1} START/,/${magic_str1} END/ s/^#//; \
+                    /^${magic_str2} START/,/${magic_str2} END/ s/^#//; \
                         " > ${dest}
             else
                 # This is the default template config
                 cat ${SRCDIR}/${file} | sed -e "\
                     s/{serial}/${serial}/; \
                     s/{toolhead_sensor_pin}/${toolhead_sensor_pin}/; \
-                    /^${magic_str}/,$ s/^#//; \
+                    /^${magic_str1} START/,/${magic_str1} END/ s/^#//; \
+                    /^${magic_str2} START/,/${magic_str2} END/ s/^#//; \
                         " > ${dest}
             fi
     	else
@@ -254,6 +261,7 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
                     fi
                     ;;
                 n)
+		endless_spool=0
                     ;;
 	    esac
 

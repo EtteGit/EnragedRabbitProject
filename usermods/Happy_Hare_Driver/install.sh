@@ -58,58 +58,73 @@ copy_template_files() {
                     magic_str2="NO CLOG"
 		fi
 
-            if [ "${sensorless_selector}" -eq 1 ]; then
+                if [ "${sensorless_selector}" -eq 1 ]; then
+                    cat ${SRCDIR}/${file} | sed -e "\
+                        s/^#endstop_pin: \^ercf:PB9/!endstop_pin: \^ercf:PB9/; \
+                        s/^#diag_pin: \^ercf:PA7/diag_pin: \^ercf:PA7/; \
+                        s/^#driver_SGTHRS: 75/driver_SGTHRS: 75/; \
+                        s/^endstop_pin: \^ercf:PB9/#endstop_pin: \^ercf:PB9/; \
+                        s/^!endstop_pin: \^ercf:PB9/endstop_pin: \^ercf:PB9/; \
+                        s/^#endstop_pin: tmc2209_selector_stepper/endstop_pin: tmc2209_selector_stepper/; \
+                        s%{serial}%${serial}%; \
+                        s/{toolhead_sensor_pin}/${toolhead_sensor_pin}/; \
+                        /^${magic_str1} START/,/${magic_str1} END/ s/^#//; \
+                        /^${magic_str2} START/,/${magic_str2} END/ s/^#//; \
+                            " > ${dest}
+                else
+                    # This is the default template config
+                    cat ${SRCDIR}/${file} | sed -e "\
+                        s%{serial}%${serial}%; \
+                        s/{toolhead_sensor_pin}/${toolhead_sensor_pin}/; \
+                        /^${magic_str1} START/,/${magic_str1} END/ s/^#//; \
+                        /^${magic_str2} START/,/${magic_str2} END/ s/^#//; \
+                            " > ${dest}
+                fi
+            elif [ "${file}" = "ercf_software.cfg" ]; then
                 cat ${SRCDIR}/${file} | sed -e "\
-                    s/^#endstop_pin: \^ercf:PB9/!endstop_pin: \^ercf:PB9/; \
-                    s/^#diag_pin: \^ercf:PA7/diag_pin: \^ercf:PA7/; \
-                    s/^#driver_SGTHRS: 75/driver_SGTHRS: 75/; \
-                    s/^endstop_pin: \^ercf:PB9/#endstop_pin: \^ercf:PB9/; \
-                    s/^!endstop_pin: \^ercf:PB9/endstop_pin: \^ercf:PB9/; \
-                    s/^#endstop_pin: tmc2209_selector_stepper/endstop_pin: tmc2209_selector_stepper/; \
-                    s/{serial}/${serial}/; \
-                    s/{toolhead_sensor_pin}/${toolhead_sensor_pin}/; \
-                    /^${magic_str1} START/,/${magic_str1} END/ s/^#//; \
-                    /^${magic_str2} START/,/${magic_str2} END/ s/^#//; \
+                    s%{klipper_config_home}%${KLIPPER_CONFIG_HOME}%g; \
                         " > ${dest}
-            else
-                # This is the default template config
+	    else
+                # Not ercf_hardware.cfg or ercf_software.cfg
                 cat ${SRCDIR}/${file} | sed -e "\
-                    s/{serial}/${serial}/; \
-                    s/{toolhead_sensor_pin}/${toolhead_sensor_pin}/; \
-                    /^${magic_str1} START/,/${magic_str1} END/ s/^#//; \
-                    /^${magic_str2} START/,/${magic_str2} END/ s/^#//; \
+                    s/{sensorless_selector}/${sensorless_selector}/g; \
+                    s/{clog_detection}/${clog_detection}/g; \
+                    s/{endless_spool}/${endless_spool}/g; \
+                    s/{servo_up_angle}/${servo_up_angle}/g; \
+                    s/{servo_down_angle}/${servo_down_angle}/g; \
+                    s/{calibration_bowden_length}/${calibration_bowden_length}/g; \
                         " > ${dest}
             fi
-    	else
-            cat ${SRCDIR}/${file} | sed -e "\
-                s/{sensorless_selector}/${sensorless_selector}/g; \
-                s/{clog_detection}/${clog_detection}/g; \
-                s/{endless_spool}/${endless_spool}/g; \
-                s/{servo_up_angle}/${servo_up_angle}/g; \
-                s/{servo_down_angle}/${servo_down_angle}/g; \
-                s/{calibration_bowden_length}/${calibration_bowden_length}/g; \
-                    " > ${dest}
+        else
+            # Non EASY-BRB just install most of the templates as is
+            if [ "${file}" = "ercf_software.cfg" ]; then
+                cat ${SRCDIR}/${file} | sed -e "\
+                    s%{klipper_config_home}%${KLIPPER_CONFIG_HOME}%g; \
+                        " > ${dest}
+            else
+                cp ${SRCDIR}/${file} ${dest}
+            fi
         fi
-    else
-        # Non EASY-BRB just install templates as is
-        cp ${SRCDIR}/${file} ${dest}
-    fi
     done
 }
 
 install_update_manager() {
     echo "Adding update manager to moonraker.conf"
-    update_section=$(grep -c '\[update_manager ercf-happy_hare\]' \
-    ${KLIPPER_CONFIG_HOME}/moonraker.conf || true)
-    if [ "${update_section}" -eq 0 ]; then
-        echo "" >> ${KLIPPER_CONFIG_HOME}/moonraker.conf
-        while read -r line; do
-            echo -e "${line}" >> ${KLIPPER_CONFIG_HOME}/moonraker.conf
-        done < "${SRCDIR}/moonraker_update.txt"
-        echo "" >> ${KLIPPER_CONFIG_HOME}/moonraker.conf
-        restart_moonraker
+    if [ -f "${KLIPPER_CONFIG_HOME}/moonraker.conf" ]; then
+        update_section=$(grep -c '\[update_manager ercf-happy_hare\]' \
+        ${KLIPPER_CONFIG_HOME}/moonraker.conf || true)
+        if [ "${update_section}" -eq 0 ]; then
+            echo "" >> ${KLIPPER_CONFIG_HOME}/moonraker.conf
+            while read -r line; do
+                echo -e "${line}" >> ${KLIPPER_CONFIG_HOME}/moonraker.conf
+            done < "${SRCDIR}/moonraker_update.txt"
+            echo "" >> ${KLIPPER_CONFIG_HOME}/moonraker.conf
+            restart_moonraker
+        else
+            echo "[update_manager ercf] already exist in moonraker.conf - skipping install"
+        fi
     else
-        echo "[update_manager ercf] already exist in moonraker.conf - skipping install"
+        echo "Moonraker.conf not found!"
     fi
 }
 
@@ -160,8 +175,8 @@ verify_home_dirs
 check_klipper
 link_ercf_plugin
 
+easy_brd=0
 if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
-    easy_brd=0
     echo
     echo "Let me see if I can help you with initial config (you will still have some manual config to perform)..."
     echo
@@ -176,7 +191,7 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
 		yn=$(prompt_yn "/dev/serial/by-id/${line}")
                 case $yn in
                     y)
-                        serial="\/dev\/serial\/by-id\/${line}"
+                        serial="/dev/serial/by-id/${line}"
 			break
                         ;;
                     n)
@@ -185,13 +200,12 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
             done
             if [ "${serial}" = "" ]; then
                 echo "Couldn't find your serial port, but no worries - I'll configure the default and you can manually change later as per the docs"
-                serial='\/dev\/ttyACM1 # Config guess. Run ls -l \/dev\/serial\/by-id and set manually'
+                serial='/dev/ttyACM1 # Config guess. Run ls -l /dev/serial/by-id and set manually'
 	    fi
 
             echo
             echo "Do you have a toolhead sensor you would like to use? If reliable this provides the smoothest and most reliable loading and unloading operation"
             yn=$(prompt_yn "Enable toolhead sensor")
-            echo
             case $yn in
                 y)
 	            toolhead_sensor=1
@@ -211,13 +225,14 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
             echo
             echo "Sensorless selector operation? This allows for additional selector recovery steps but disables the 'extra' input on the EASY-BRD."
             yn=$(prompt_yn "Enable sensorless selector operation")
-            echo
             case $yn in
                 y)
+                    echo
 	            echo "    IMPORTANT: Set the J6 jumper pins to 2-3 and 4-5, i.e. .[..][..]  MAKE A NOTE NOW!!"
 	            sensorless_selector=1
                     ;;
                 n)
+                    echo
 	            echo "    IMPORTANT: Set the J6 jumper pins to 1-2 and 4-5, i.e. [..].[..]  MAKE A NOTE NOW!!"
 	            sensorless_selector=0
                     ;;
@@ -256,6 +271,7 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
                 y)
                     endless_spool=1
                     if [ "${clog_detection}" -eq 0 ]; then
+                        echo
                         echo "    NOTE: I've re-enabled clog detection which is necessary for EndlessSpool to function"
                         clog_detection=1
                     fi
@@ -276,31 +292,36 @@ if [ "${INSTALL_TEMPLATES}" -eq 1 ]; then
                     break
                 fi
             done
-	    echo 
-
-	    echo
-	    echo "NOTES:"
-	    echo " What still needs to be done:"
-	    echo " * Adjust motor speeds and current if using NEMA 17 motors"
-	    echo " * Adjust motor direction with '!' on pin if necessary. No way to know here"
-	    echo " * Adjust your config for loading and unloading preferences"
-	    echo " * Adjust distances (bowden length & extruder) for you particular setup"
-	    echo 
-	    echo "Good luck! ERCF is complex to setup. Remember Discord is your friend.."
-	    echo
             ;;
 
         n)
             echo "Sorry, I only support the EASY-BRD setup at the moment"
-            echo
-	    easy_brd=0
 	    ;;
     esac
 
-    copy_template_files
+
     echo
+    echo
+    echo "    vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+    echo
+    echo "    NOTES:"
+    echo "     What still needs to be done:"
+    if [ "${easy_brd}" -eq 0 ]; then
+        echo "     * Edit *.cfg files and substitute all \${xxx} tokens to match your setup"
+    else
+        echo "     * Tweak motor speeds and current, especially if using non BOM motors"
+        echo "     * Adjust motor direction with '!' on pin if necessary. No way to know here"
+    fi
+    echo "     * Adjust your config for loading and unloading preferences"
+    echo "     * Adjust toolhead distances 'home_to_extruder' for your particular setup"
+    echo 
+    echo "    Good luck! ERCF is complex to setup. Remember Discord is your friend.."
+    echo
+    echo "    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+    echo
+
 fi
 
+copy_template_files
 install_update_manager
 restart_klipper
-

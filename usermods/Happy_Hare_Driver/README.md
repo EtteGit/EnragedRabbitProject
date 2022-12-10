@@ -20,7 +20,7 @@ I love my ERCF and building it was the most fun I've had in many years of the 3D
 <li>Reworks calibration routine to average measurements, add compensation based on spring in filament (related to ID and length of bowden), and considers configuration options.
 <li>Runtime configuration via new command (ERCF_TEST_CONFIG) for most options which avoids constantly restarting klipper or recalibrating during setup
 <li>Workarond to some of the ways to provoke Klipper “Timer too close” errors (although there are definitely bugs in the Klipper firmware)
-<li>More reliable “in-print” detection so tool change command “Tx” g-code can be used anytime and the user does not need to resort to “ERCF_CHANGE_TOOL_STANDALONE”
+<li>More reliable “in-print” detection so tool change command “Tx” g-code can be used anytime and the user does not need to resort to “ERCF_CHANGE_TOOL STANDALONE=1”
 <li>New LOG_LEVEL=4 for developer use.  BTW This is useful in seeing the exact stepper movements
 <li>New "TEST" commands to help diagnose issues with encoder
 <li>Experimental logic to use stallguard filament homing (Caveat: not easy to setup using EASY-BRD and not compatible with sensorless selector homing option)
@@ -48,7 +48,10 @@ The module can be installed into a existing Klipper installation with the instal
 The `-i` option will bring up some interactive prompts to aid setting some confusing parameters on EASY-BRD (like sensorless selector homing setup). If not run with the `-i` flag the new template .cfg files will not be installed.  Note that if existing ercf*.cfg files are found the old versions will be moved to <file>.00 extension instead so as not to overwrite an existing configuration.  If you still choose not to install the new ercf*.cfg files automatically be sure to examine them closely and compare to the supplied templates - some options have changed!
 <br>
 
-Be sure to read my [notes on Encoder problems](doc/ENCODER.md) - the better the encoder the better this software will work.
+_REMEMBER that ercf_hardware.cfg; ercf_software.cfg & ercf_parameters.cfg must all be referenced by your printer.cfg master config file and your PAUSE/RESUME macros may need to be updated -- see the reference client_macros.cfg for additions_
+<br>
+
+Also be sure to read my [notes on Encoder problems](doc/ENCODER.md) - the better the encoder the better this software will work.
 
 <br>
   
@@ -62,6 +65,7 @@ Be sure to read my [notes on Encoder problems](doc/ENCODER.md) - the better the 
 <li> v1.1.3 - Added ERCF_RECOVER command to re-establish filament position after manual intervention and filament movement. Not necessary if you use ERCF commands to correct problem but useful to call prior to RESUME; Much improved install.sh to cover toolhead sensor and auto restart moonraker on first time install
 <li> v1.1.4 - Change to automatic clog detection length based on community feedback
 <li> v1.1.5 - Further install.sh improvements - no longer need filament_sensor defined or duplicate pin override if not using clog detection; Cleaned up documentation in template config file; Stallguard filament homing should now be possible (have to configure by hand); Additional configuration checks on startup; minor useabilty improvements based on community feedback
+<li> v1.1.6 - New feature to log to file independently to console (allows for clean console and debug to logfile);  New gate statistics (like slippage) are recorded and available with an augmented ERCF_DUMP_STATS command; Several minor improvements and fixes suggested by community
 </ul>
 
 <br>
@@ -228,7 +232,7 @@ Good luck and hopefully a little less *enraged* printing.  You can find me on di
   | Commmand | Description | Parameters |
   | -------- | ----------- | ---------- |
   | ERCF_RESET_STATS | Reset the ERCF statistics | None |
-  | ERCF_DUMP_STATS | Dump the ERCF statistics | None |
+  | ERCF_DUMP_STATS | Dump the ERCF statistics (and Gate statistics to debug level - usually the logfile) | None |
   | ERCF_SET_LOG_LEVEL | Sets the logging level and turning on/off of visual loading/unloading sequence | LEVEL=\[1..4\] <br>VISUAL=\[0\|1\] Whether to also show visual representation |
   | ERCF_STATUS | Report on ERCF state, cababilities and Tool-to-Gate map | SHOWCONFIG=\[0|1\] Whether or not to show the machine configuration in status message |
   | ERCF_DISPLAY_ENCODER_POS | Displays the current value of the ERCF encoder | None |

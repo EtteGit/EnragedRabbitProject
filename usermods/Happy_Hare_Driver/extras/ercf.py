@@ -2,16 +2,61 @@
 #
 # Copyright (C) 2021  Ette
 #
-# Major rewrite and feature updates Nov 2022  moggieuk#6538 (discord)
+# Happy Hare rewrite and feature updates Nov 2022  moggieuk#6538 (discord)
+#
+# (\_/)
+# ( *,*)
+# (")_(") ERCF Ready
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
 #
-import copy
-import logging
-import math
-import time
+import logging, logging.handlers, threading, queue, time
+import textwrap, math, os.path
 from random import randint
-from . import force_move, pulse_counter
+from . import pulse_counter
+
+# Forward all messages through a queue (polled by background thread)
+class QueueHandler(logging.Handler):
+    def __init__(self, queue):
+        logging.Handler.__init__(self)
+        self.queue = queue
+
+    def emit(self, record):
+        try:
+            self.format(record)
+            record.msg = record.message
+            record.args = None
+            record.exc_info = None
+            self.queue.put_nowait(record)
+        except Exception:
+            self.handleError(record)
+
+# Poll log queue on background thread and log each message to logfile
+class QueueListener(logging.handlers.TimedRotatingFileHandler):
+    def __init__(self, filename):
+        logging.handlers.TimedRotatingFileHandler.__init__(
+            self, filename, when='midnight', backupCount=5)
+        self.bg_queue = queue.Queue()
+        self.bg_thread = threading.Thread(target=self._bg_thread)
+        self.bg_thread.start()
+
+    def _bg_thread(self):
+        while True:
+            record = self.bg_queue.get(True)
+            if record is None:
+                break
+            self.handle(record)
+
+    def stop(self):
+        self.bg_queue.put_nowait(None)
+        self.bg_thread.join()
+
+# Class to improve formatting of multi-line ERCF messages
+class MultiLineFormatter(logging.Formatter):
+    def format(self, record):
+        indent = ' ' * 9
+        lines = super(MultiLineFormatter, self).format(record)
+        return lines.replace('\n', '\n' + indent)
 
 class EncoderCounter:
     def __init__(self, printer, pin, sample_time, poll_time, encoder_steps):
@@ -81,9 +126,11 @@ class Ercf:
         self.config = config
         self.printer = config.get_printer()
         self.reactor = self.printer.get_reactor()
-        self.printer.register_event_handler("klippy:connect", self.handle_connect)
+        self.printer.register_event_handler('klippy:connect', self.handle_connect)
+        self.printer.register_event_handler("klippy:disconnect", self.handle_disconnect)
+        self.printer.register_event_handler("klippy:ready", self.handle_ready)
 
-        # Manual steppers
+        # Manual steppers & Encoder
         self.selector_stepper = self.gear_stepper = None
         self.encoder_pin = config.get('encoder_pin')
         self.encoder_resolution = config.getfloat('encoder_resolution', 0.5, above=0.)
@@ -119,11 +166,9 @@ class Ercf:
         self.calibration_bowden_length = config.getfloat('calibration_bowden_length')
         self.unload_buffer = config.getfloat('unload_buffer', 30., above=15.)
         self.home_to_extruder = config.getint('home_to_extruder', 0, minval=0, maxval=1)
-        self.homing_method = config.getint('homing_method', 0, minval=0, maxval=1)
         self.extruder_homing_max = config.getfloat('extruder_homing_max', 50., above=20.)
         self.extruder_homing_step = config.getfloat('extruder_homing_step', 2., above=0.5, maxval=5.)
-        self.extruder_homing_current = config.getint('extruder_homing_current', 50, minval=0, maxval=100)
-        if self.extruder_homing_current == 0: self.extruder_homing_current = 100
+        self.extruder_homing_current = config.getint('extruder_homing_current', 50, minval=20, maxval=100)
         self.toolhead_homing_max = config.getfloat('toolhead_homing_max', 20., minval=0.)
         self.toolhead_homing_step = config.getfloat('toolhead_homing_step', 1., above=0.5, maxval=5.)
         self.sync_load_length = config.getfloat('sync_load_length', 8., minval=0., maxval=50.)
@@ -132,12 +177,15 @@ class Ercf:
         self.home_position_to_nozzle = config.getfloat('home_position_to_nozzle', above=20.)
 
         # Options
+        self.homing_method = config.getint('homing_method', 0, minval=0, maxval=1)
         self.sensorless_selector = config.getint('sensorless_selector', 0, minval=0, maxval=1)
         self.enable_clog_detection = config.getint('enable_clog_detection', 1, minval=0, maxval=1)
         self.enable_endless_spool = config.getint('enable_endless_spool', 0, minval=0, maxval=1)
         self.endless_spool_groups = list(config.getintlist('endless_spool_groups', []))
 
+        # Logging
         self.log_level = config.getint('log_level', 1, minval=0, maxval=4)
+        self.logfile_level = config.getint('logfile_level', 3, minval=-1, maxval=4)
         self.log_statistics = config.getint('log_statistics', 0, minval=0, maxval=1)
         self.log_visual = config.getint('log_visual', 1, minval=0, maxval=1)
 
@@ -163,18 +211,22 @@ class Ercf:
         for i in range(len(self.selector_offsets)):
             self.tool_to_gate_map.append(i)
 
-
         # State variables
         self.is_paused = False
         self.is_homed = False
         self.need_to_recover_state = False
         self.paused_extruder_temp = 0.
         self.tool_selected = self.TOOL_UNKNOWN
-        self.gate_selected = self.GATE_UNKNOWN  # We keep record of gate selected incase user messes with mapping in print
+        self.gate_selected = self.GATE_UNKNOWN  # We keep record of gate selected in case user messes with mapping in print
         self.servo_state = self.SERVO_UNKNOWN_STATE
         self.loaded_status = self.LOADED_STATUS_UNKNOWN
         self.filament_direction = self.DIRECTION_LOAD
         self.calibrating = False
+        self.done_connect = False
+
+        # Logging
+        self.queue_listener = None
+        self.ercf_logger = None
 
         # Statistics
         self.total_swaps = 0
@@ -182,6 +234,7 @@ class Ercf:
         self.time_spent_unloading = 0
         self.time_spent_paused = 0
         self.total_pauses = 0
+        self.gate_statistics = []
 
         # Register GCODE commands
         self.gcode = self.printer.lookup_object('gcode')
@@ -364,15 +417,41 @@ class Ercf:
 
         self.ref_step_dist=self.gear_stepper.steppers[0].get_step_dist()
         self.variables = self.printer.lookup_object('save_variables').allVariables
-        # Override motion sensor runout detection_length based on calibration
-        self.encoder_sensor.detection_length = self._get_calibration_clog_length()
-        self.printer.register_event_handler("klippy:ready", self.handle_ready)
-        self._reset_statistics()
 
+        # Override motion sensor runout detection_length based on calibration
+        if self.encoder_sensor != None:
+            self.encoder_sensor.detection_length = self._get_calibration_clog_length()
+
+        # Setup background file based logging
+        if self.logfile_level >= 0:
+            logfile_path = self.printer.start_args['log_file']
+            dirname = os.path.dirname(logfile_path)
+            if dirname == None:
+                ercf_log = '/tmp/ercf.log'
+            else:
+                ercf_log = dirname + '/ercf.log'
+            self._log_debug("ercf_log=%s" % ercf_log)
+            self.queue_listener = QueueListener(ercf_log)
+            self.queue_listener.setFormatter(MultiLineFormatter('%(asctime)s %(message)s', datefmt='%I:%M:%S'))
+            queue_handler = QueueHandler(self.queue_listener.bg_queue)
+            self.ercf_logger = logging.getLogger('ercf')
+            self.ercf_logger.setLevel(logging.INFO)
+            self.ercf_logger.addHandler(queue_handler)
+
+        # Setup statistics
+        if not self.done_connect:
+            self._reset_statistics()
+
+        self.done_connect = True
+
+    def handle_disconnect(self):
+        self._log_always('ERCF Shutdown')
+        if self.queue_listener != None:
+            self.queue_listener.stop()
 
     def handle_ready(self):
         self._setup_heater_off_reactor()
-        self._log_always('(\_/)\n( *,*)\n(")_(") ERCF Ready\n')
+        self._log_always('(\_/)\n( *,*)\n(")_(") ERCF Ready')
 
 
 ####################################
@@ -389,9 +468,13 @@ class Ercf:
         self.time_spent_unloading = 0
         self.total_pauses = 0
         self.time_spent_paused = 0
-
         self.tracked_start_time = 0
         self.pause_start_time = 0
+
+        self.gate_statistics = []
+        for gate in range(len(self.selector_offsets)):
+            self.gate_statistics.append(gate)
+            self.gate_statistics[gate] = self._get_gate_statistics(gate)
 
     def _track_swap_completed(self):
         self.total_swaps += 1
@@ -411,9 +494,20 @@ class Ercf:
     def _track_pause_start(self):
         self.total_pauses += 1
         self.pause_start_time = time.time()
+        self._track_gate_statistics('pauses', self.gate_selected)
 
     def _track_pause_end(self):
         self.time_spent_paused += time.time() - self.pause_start_time
+
+    # Per gate tracking
+    def _track_gate_statistics(self, key, gate, count=1):
+        try:
+            if gate != self.GATE_UNKNOWN:
+                self.gate_statistics[gate][key] += count
+            else:
+                self._log_debug("Unknown gate provided to record gate stats")
+        except Exception as e:
+            self._log_debug("Exception whilst tracking gate stats: %s" % str(e))
 
     def _seconds_to_human_string(self, seconds):
         result = ""
@@ -428,7 +522,7 @@ class Ercf:
 
     def _statistics_to_human_string(self):
         msg = "ERCF Statistics:"
-        msg += "\n%d Swaps Completed" % self.total_swaps
+        msg += "\n%d swaps completed" % self.total_swaps
         msg += "\n%s spent loading" % self._seconds_to_human_string(self.time_spent_loading)
         msg += "\n%s spent unloading" % self._seconds_to_human_string(self.time_spent_unloading)
         msg += "\n%s spent paused (%d pauses total)" % (self._seconds_to_human_string(self.time_spent_paused), self.total_pauses)
@@ -436,26 +530,69 @@ class Ercf:
 
     def _dump_statistics(self, report=False):
         if self.log_statistics or report:
-            self._log_info(self._statistics_to_human_string())
+            self._log_always(self._statistics_to_human_string())
+            self._dump_gate_statistics()
+
+    def _dump_gate_statistics(self):
+        msg = "Gate Statistics:\n"
+        dbg = ""
+        for gate in range(len(self.selector_offsets)):
+            #rounded = {k:round(v,1) if isinstance(v,float) else v for k,v in self.gate_statistics[gate].items()}
+            rounded = self.gate_statistics[gate]
+            load_slip_percent = (rounded['load_delta'] / rounded['load_distance']) * 100 if rounded['load_distance'] != 0. else 0.
+            unload_slip_percent = (rounded['unload_delta'] / rounded['unload_distance']) * 100 if rounded['unload_distance'] != 0. else 0.
+            # Give the gate a reliabilty grading based on slippage
+            grade = load_slip_percent + unload_slip_percent
+            if grade < 2.:
+                status = "Good"
+            elif grade < 4.:
+                status = "Marginal"
+            elif grade < 6.:
+                status = "Degraded"
+            elif grade < 10.:
+                status = "Poor"
+            else:
+                status = "Terrible"
+            msg += "#%d: %s" % (gate, status)
+            msg += ", " if gate < (len(self.selector_offsets) - 1) else ""
+            dbg += "\nGate #%d: " % gate
+            dbg += "Load: (monitored: %.1fmm slippage: %.1f%%)" % (rounded['load_distance'], load_slip_percent)
+            dbg += "; Unload: (monitored: %.1fmm slippage: %.1f%%)" % (rounded['unload_distance'], unload_slip_percent)
+            dbg += "; Failures: (servo: %d load: %d unload: %d pauses: %d)" % (rounded['servo_retries'], rounded['load_failures'], rounded['unload_failures'], rounded['pauses'])
+        self._log_always(msg)
+        self._log_debug(dbg)
 
     def _log_always(self, message):
+        if self.ercf_logger:
+            self.ercf_logger.info(message)
         self.gcode.respond_info(message)
 
     def _log_info(self, message):
+        if self.ercf_logger and self.logfile_level > 0:
+            self.ercf_logger.info(message)
         if self.log_level > 0:
             self.gcode.respond_info(message)
 
     def _log_debug(self, message):
+        message = "- DEBUG: %s" % message
+        if self.ercf_logger and self.logfile_level > 1:
+            self.ercf_logger.info(message)
         if self.log_level > 1:
-            self.gcode.respond_info("- DEBUG: %s" % message)
+            self.gcode.respond_info(message)
 
     def _log_trace(self, message):
+        message = "- - TRACE: %s" % message
+        if self.ercf_logger and self.logfile_level > 2:
+            self.ercf_logger.info(message)
         if self.log_level > 2:
-            self.gcode.respond_info("- - TRACE: %s" % message)
+            self.gcode.respond_info(message)
 
     def _log_stepper(self, message):
+        message = "- - - STEPPER: %s" % message
+        if self.ercf_logger and self.logfile_level > 3:
+            self.ercf_logger.info(message)
         if self.log_level > 3:
-            self.gcode.respond_info("- - - STEPPER: %s" % message)
+            self.gcode.respond_info(message)
 
     # Fun visual display of ERCF state
     def _display_visual_state(self, direction=None):
@@ -504,6 +641,20 @@ class Ercf:
             visual = visual.replace(">", "<")
         return visual
 
+    def _log_level_to_human_string(self, level):
+        log = "OFF"
+        if level > 3:
+            log = "STEPPER"
+        elif level > 2:
+            log = "TRACE"
+        elif level > 1:
+            log = "DEBUG"
+        elif level > 0:
+            log = "INFO"
+        elif level > -1:
+            log = "ESSENTIAL MESSAGES"
+        return log
+
 ### LOGGING AND STATISTICS FUNCTIONS GCODE FUNCTIONS
 
     cmd_ERCF_RESET_STATS_help = "Reset the ERCF statistics"
@@ -535,12 +686,12 @@ class Ercf:
         msg += "\nFilament position: %s" % self._state_to_human_string()
         
         if config:
-            msg += "\n\nConfiguration:\nFilament homes "
+            msg += "\n\nConfiguration:\nFilament homes"
             if self.home_to_extruder:
                 if self.homing_method == self.EXTRUDER_COLLISION:
-                    msg += "to EXTRUDER using COLLISION DETECTION (current %d%%)" % self.extruder_homing_current
+                    msg += " to EXTRUDER using COLLISION DETECTION (current %d%%)" % self.extruder_homing_current
                 else:
-                    msg += "to EXTRUDER using STALLGUARD"
+                    msg += " to EXTRUDER using STALLGUARD"
                 if self.toolhead_sensor != None:
                     msg += " and then"
             msg += " to TOOLHEAD SENSOR" if self.toolhead_sensor != None else ""
@@ -559,16 +710,8 @@ class Ercf:
             msg += "\nSelector homing is %s - blocked gate detection and recovery %s possible" % (("sensorless", "may be") if self.sensorless_selector else ("microswitch", "is not"))
             msg += "\nClog detection is %s" % ("ENABLED" if self.enable_clog_detection else "DISABLED")
             msg += " and EndlessSpool is %s" % ("ENABLED" if self.enable_endless_spool else "DISABLED")
-            log = "ESSENTIAL MESSAGES"
-            if self.log_level > 3:
-                log = "STEPPER"
-            elif self.log_level > 2:
-                log = "TRACE"
-            elif self.log_level > 1:
-                log = "DEBUG"
-            elif self.log_level > 0:
-                log = "INFO"
-            msg += "\nLogging level is %d (%s)" % (self.log_level, log)
+            msg += "\nConsole logging level is %d (%s)" % (self.log_level, self._log_level_to_human_string(self.log_level))
+            msg += ", Logfile level is %d (%s)" % (self.logfile_level, self._log_level_to_human_string(self.logfile_level))
             msg += "%s" % " and statistics are being logged" if self.log_statistics else ""
         msg += "\n\nTool/gate mapping%s" % (" and EndlessSpool groups:" if self.enable_endless_spool else ":")
         msg += "\n%s" % self._tool_to_gate_map_to_human_string()
@@ -662,15 +805,19 @@ class Ercf:
         return self.variables.get('ercf_calib_%d' % gate, 1.)
 
     def _get_calibration_clog_length(self):
-        return max(self.variables.get('ercf_calib_clog_length', 7.), 5.)
+        return max(self.variables.get('ercf_calib_clog_length', 5.), 5.)
+
+    def _get_gate_statistics(self, gate):
+        empty_stats_dict = {'pauses': 0, 'loads': 0, 'load_distance': 0.0, 'load_delta': 0.0, 'unloads': 0, 'unload_distance': 0.0, 'unload_delta': 0.0, 'servo_retries': 0, 'load_failures': 0, 'unload_failures': 0}
+        return self.variables.get('ercf_statistics_gate_%d' % gate, empty_stats_dict)
 
     def _calculate_calibration_ref(self, extruder_homing_length=400, repeats=3):
-        self._log_always("Calibrating reference tool T0")
-        self._select_tool(0)
-        self._set_steps(1.)
-        reference_sum = spring_max = 0.
-        successes = 0
         try:
+            self._log_always("Calibrating reference tool T0")
+            self._select_tool(0)
+            self._set_steps(1.)
+            reference_sum = spring_max = 0.
+            successes = 0
             for i in range(repeats):
                 self._servo_down()
                 self._counter.reset_counts()    # Encoder 0000
@@ -735,10 +882,10 @@ class Ercf:
             self._servo_up()
 
     def _calculate_calibration_ratio(self, tool):
-        load_length = self.calibration_bowden_length - 100.
-        self._select_tool(tool)
-        self._set_steps(1.)
         try:
+            load_length = self.calibration_bowden_length - 100.
+            self._select_tool(tool)
+            self._set_steps(1.)
             self._servo_down()
             self._counter.reset_counts()    # Encoder 0000
             encoder_moved = self._load_encoder()
@@ -880,16 +1027,12 @@ class Ercf:
             self._log_always("Measuring the selector position for gate %d" % gate)
             self.selector_stepper.do_set_position(0.)
             init_position = self.selector_stepper.steppers[0].get_mcu_position()
-            self._selector_stepper_move_wait(-move_length, speed=60, homing_move=1)
+            self._selector_stepper_move_wait(-move_length, speed=80, homing_move=1)
             current_position = self.selector_stepper.steppers[0].get_mcu_position()
             traveled_position = abs(current_position - init_position) * self.selector_stepper.steppers[0].get_step_dist()
 
             # Test we actually homed, if not we didn't move far enough
-            if self.sensorless_selector == 1:
-                homed = self.gear_endstop.query_endstop(self.toolhead.get_last_move_time())
-            else:
-                homed = self.selector_endstop.query_endstop(self.toolhead.get_last_move_time())
-            if not homed:
+            if not self._check_selector_endstop():
                 self._log_always("Selector didn't find home position. Are you sure you selected the correct gate?")
             else:
                 self._log_always("Selector position = %.1fmm" % traveled_position)
@@ -897,6 +1040,7 @@ class Ercf:
             self._pause(str(ee))
         finally:
             self.calibrating = False
+            self.is_homed = False
 
 
 ########################
@@ -920,10 +1064,13 @@ class Ercf:
         self.gcode.run_script_from_command("SET_IDLE_TIMEOUT TIMEOUT=%d" % self.timeout_pause)
         self.reactor.update_timer(self.heater_off_handler, self.reactor.monotonic() + self.disable_heater)
         msg = "An issue with the ERCF has been detected and the ERCF has been PAUSED"
-        msg += "\nReason: %s" % reason
+        self.gcode.respond_raw("!! %s" % msg)   # non highlighted alternative self._log_always(msg)
+        if self.ercf_logger:
+            self.ercf_logger.info(msg)
+        msg = "Reason: %s" % reason
         msg += "\nWhen you intervene to fix the issue, first call \"ERCF_UNLOCK\""
         msg += "\nRefer to the manual before resuming the print"
-        self.gcode.respond_raw("!! %s" % msg)   # non highlighted alternative self._log_always(msg)
+        self._log_always(msg)
         self.gcode.run_script_from_command("SAVE_GCODE_STATE NAME=ERCF_state")
         self._disable_encoder_sensor()
         self.gcode.run_script_from_command("PAUSE")
@@ -978,11 +1125,12 @@ class Ercf:
         status = self.printer.lookup_object("idle_timeout").get_status(self.printer.get_reactor().monotonic())
         if self.printer.lookup_object("pause_resume").is_paused:
             status["state"] = "Paused"
-        return status["state"] == "Printing" and status["printing_time"] > 2.0
+        self._log_debug("Is in print reported: %s" % status)
+        return status["state"] == "Printing" and status["printing_time"] > 1.0
 
     def _set_above_min_temp(self):
         if not self.printer.lookup_object("extruder").heater.can_extrude :
-            self._log_info("M118 Heating extruder above min extrusion temp (%.1f)" % self.min_temp_extruder)
+            self._log_info("Heating extruder above min extrusion temp (%.1f)" % self.min_temp_extruder)
             self.gcode.run_script_from_command("M109 S%.1f" % self.min_temp_extruder)
 
     def _set_loaded_status(self, state, silent=False):
@@ -1028,8 +1176,8 @@ class Ercf:
         if wait:
             self.toolhead.wait_moves()
 
-    # Convenience wrapper around a gear and extrduer motor move that tracks measured movement and create trace log entry
-    def _trace_filament_move(self, trace_str, distance, speed=None, accel=None, motor="gear", homing=False):
+    # Convenience wrapper around a gear and extruder motor move that tracks measured movement and create trace log entry
+    def _trace_filament_move(self, trace_str, distance, speed=None, accel=None, motor="gear", homing=False, track=False):
         if speed == None:
             speed = self.gear_stepper.velocity
         start = self._counter.get_distance()
@@ -1064,6 +1212,13 @@ class Ercf:
         delta = abs(distance) - measured
         trace_str += ". Counter: @%.1fmm" % end
         self._log_trace(trace_str % (distance, measured, delta))
+        if motor == "gear" and track:
+            if distance > 0:
+                self._track_gate_statistics('load_distance', self.gate_selected, distance)
+                self._track_gate_statistics('load_delta', self.gate_selected, delta)
+            else:
+                self._track_gate_statistics('unload_distance', self.gate_selected, -distance)
+                self._track_gate_statistics('unload_delta', self.gate_selected, delta)
         return delta
 
     def _selector_stepper_move_wait(self, dist, wait=True, speed=None, accel=None, homing_move=0):
@@ -1073,8 +1228,10 @@ class Ercf:
             accel = self.selector_stepper.accel
         if homing_move:
             self.toolhead.wait_moves() # Necessary before homing move
+            self._log_stepper("SELECTOR: dist=%.1f, speed=%d, accel=%d homing=%d" % (dist, speed, accel, homing_move))
             self.selector_stepper.do_homing_move(dist, speed, accel, homing_move > 0, abs(homing_move) == 1)
         else:
+            self._log_stepper("SELECTOR: dist=%.1f, speed=%d, accel=%d" % (dist, speed, accel))
             self.selector_stepper.do_move(dist, speed, accel)
         if wait:
             self.toolhead.wait_moves()
@@ -1168,6 +1325,9 @@ class Ercf:
             self.toolhead.wait_moves()
             self._log_info("Loaded %.1fmm of filament" % self._counter.get_distance())
             self._counter.reset_counts()    # Encoder 0000
+        except ErcfError as ee:
+            self._track_gate_statistics('load_failures', self.gate_selected)
+            raise ErcfError(ee)
         finally:
             self._track_load_end()
 
@@ -1180,6 +1340,7 @@ class Ercf:
         if (self.LONG_MOVE_THRESHOLD - delta) <= 6.0:
             if retry:
                 self._log_always("Error unloading filament - not enough detected at encoder. Retrying...")
+                self._track_gate_statistics('servo_retries', self.gate_selected)
                 self._servo_up()
                 self._servo_down()
                 delta = self._trace_filament_move("Retry load into encoder", self.LONG_MOVE_THRESHOLD)
@@ -1204,7 +1365,7 @@ class Ercf:
         delta = 0
         for i in range(moves):
             msg = "Course loading move #%d into bowden" % (i+1)
-            delta += self._trace_filament_move(msg, length / moves)
+            delta += self._trace_filament_move(msg, length / moves, track=True)
             if i < moves:
                 self._set_loaded_status(self.LOADED_STATUS_PARTIAL_IN_BOWDEN)
 
@@ -1213,14 +1374,13 @@ class Ercf:
             for i in range(2):
                 if delta >= tolerance:
                     msg = "Correction load move #%d into bowden" % (i+1)
-                    delta = self._trace_filament_move(msg, delta)
+                    delta = self._trace_filament_move(msg, delta, track=True)
                     self._log_debug("Correction load move was necessary, encoder now measures %.1fmm" % self._counter.get_distance())
                 else:
                     break
             if delta > tolerance:
                 self._set_loaded_status(self.LOADED_STATUS_PARTIAL_IN_BOWDEN)
                 self._log_info("Warning: Excess slippage was detected in bowden tube load afer correction moves. Moved %.1fmm, Encoder delta %.1fmm. Possible causes:\nCalibration ref length too long (hitting extruder gear before homing) \nERCF gears are not properly gripping filament\nEncoder reading is inaccurate\nFaulty servo" % (length, delta))
-                #raise ErcfError("Too much slippage (%.1fmm) detected during the load of bowden. Possible causes:\nCalibration ref length is too long\nERCF gears are not properly gripping filament\nEncoder reading is inaccurate\nFaulty servo" % delta)
         else:
             if delta >= tolerance:
                 self._log_info("Warning: Excess slippage was detected in bowden tube load but 'apply_bowden_correction' is disabled. Moved %.1fmm, Encoder delta %.1fmm" % (length, delta))
@@ -1388,7 +1548,7 @@ class Ercf:
                 self._display_visual_state()
 
             if self.loaded_status == self.LOADED_STATUS_UNLOADED:
-                self._log_info("Filament already ejected")
+                self._log_debug("Filament already ejected")
                 self._servo_up()
                 return
 
@@ -1421,6 +1581,10 @@ class Ercf:
             self.toolhead.wait_moves()
             self._log_info("Unloaded %.1fmm of filament" % self._counter.get_distance())
             self._counter.reset_counts()    # Encoder 0000
+
+        except ErcfError as ee:
+            self._track_gate_statistics('unload_failures', self.gate_selected)
+            raise ErcfError(ee)
 
         finally:
             self._track_unload_end()
@@ -1504,16 +1668,17 @@ class Ercf:
                 delta = self._trace_filament_move("Sync unload", -initial_move, speed=10, motor="both")
             else:
                 self._log_debug("Moving the gear motor for %.1fmm" % -initial_move) 
-                delta = self._trace_filament_move("Unload", -initial_move, speed=10, motor="gear")
+                delta = self._trace_filament_move("Unload", -initial_move, speed=10, motor="gear", track=True)
             if delta > initial_move / 2:
                 self._log_always("Error unloading filament - not enough detected at encoder. Suspect servo not properly down")
                 self._log_always("Adjusting 'extra_servo_dwell_down' may help. Retrying...")
+                self._track_gate_statistics('servo_retries', self.gate_selected)
                 self._servo_up()
                 self._servo_down()
                 if sync:
                     delta = self._trace_filament_move("Retrying sync unload move after servo reset", -delta, speed=10, motor="both")
                 else:
-                    delta = self._trace_filament_move("Retrying unload move after servo reset", -delta, speed=10, motor="gear")
+                    delta = self._trace_filament_move("Retrying unload move after servo reset", -delta, speed=10, motor="gear", track=True)
                 if delta > 2.0:
                     # Actually we are likely still stuck in extruder
                     self._set_loaded_status(self.LOADED_STATUS_PARTIAL_IN_EXTRUDER)
@@ -1525,7 +1690,7 @@ class Ercf:
         delta = 0
         for i in range(moves):
             msg = "Course unloading move #%d from bowden" % (i+1)
-            delta += self._trace_filament_move(msg, -length / moves)
+            delta += self._trace_filament_move(msg, -length / moves, track=True)
             if i < moves:
                 self._set_loaded_status(self.LOADED_STATUS_PARTIAL_IN_BOWDEN)
 
@@ -1557,12 +1722,14 @@ class Ercf:
 
     # Form tip and return True if encoder movement occured
     def _form_tip_standalone(self):
-        park_pos = 35.  # TODO bring in from tip forming (parking postion in extruder)
+        park_pos = 35.  # TODO cosmetic: bring in from tip forming (parking postion in extruder)
         self._log_info("Forming tip...")
         self._set_above_min_temp()
         self._servo_up()
         initial_encoder_position = self._counter.get_distance()
+        initial_pa = self.printer.lookup_object("extruder").get_status(0)['pressure_advance'] # Capture PA in case user's tip forming resets it
         self.gcode.run_script_from_command("_ERCF_FORM_TIP_STANDALONE")
+        self.gcode.run_script_from_command("SET_PRESSURE_ADVANCE ADVANCE=%.4f" % initial_pa) # Restore PA
         delta = self._counter.get_distance() - initial_encoder_position
         self._log_trace("After tip formation, encoder moved %.2f" % delta)
         self._counter.set_distance(initial_encoder_position + park_pos)
@@ -1586,9 +1753,9 @@ class Ercf:
         if not self.loaded_status == self.LOADED_STATUS_UNLOADED:
             self._unload_sequence(self._get_calibration_ref(), check_state=True)
         self._unselect_tool()
-        if self._home_selector():
-            if tool >= 0:
-                self._select_tool(tool)
+        self._home_selector()
+        if tool >= 0:
+            self._select_tool(tool)
 
     def _home_selector(self):
         self.is_homed = False
@@ -1599,26 +1766,38 @@ class Ercf:
         self.toolhead.wait_moves()
         if self.sensorless_selector == 1:
             self.selector_stepper.do_set_position(0.)
-            self._selector_stepper_move_wait(5, False)  # Ensure some bump space
+            self._selector_stepper_move_wait(2, False)  # Ensure some bump space
             self.selector_stepper.do_set_position(0.)
-            self._selector_stepper_move_wait(-selector_length, speed=60, homing_move=1)
-            # Did we actually hit the physical endstop (configured on gear_stepper!)
-            self.is_homed = self.gear_endstop.query_endstop(self.toolhead.get_last_move_time())
+            self._selector_stepper_move_wait(-selector_length, speed=80, homing_move=1)
         else:
             self.selector_stepper.do_set_position(0.)
             self._selector_stepper_move_wait(-selector_length, speed=100, homing_move=1)   # Fast homing move
             self.selector_stepper.do_set_position(0.)
             self._selector_stepper_move_wait(5, False)                      # Ensure some bump space
-            self._selector_stepper_move_wait(-10, speed=10, homing_move=1)  # Slower more accurate  homing move
-            self.is_homed = self.selector_endstop.query_endstop(self.toolhead.get_last_move_time())
+            self._selector_stepper_move_wait(-10, speed=10, homing_move=1)  # Slower more accurate homing move
 
+        self.is_homed = self._check_selector_endstop()
         if not self.is_homed:
             self._set_tool_selected(self.TOOL_UNKNOWN)
-            raise ErcfError("Homing selector failed because of blockage")
-        else:
-            self.selector_stepper.do_set_position(0.)     
+            raise ErcfError("Homing selector failed because of blockage or error")
+        self.selector_stepper.do_set_position(0.)
 
-        return self.is_homed
+    # Give Klipper several chances to give the right answer
+    # No idea what's going on with Klipper but it can give erroneous not TRIGGERED readings
+    # (perhaps because of bounce in switch or message delays) so this is a workaround
+    def _check_selector_endstop(self):
+        homed = False
+        for i in range(4):
+            last_move_time = self.toolhead.get_last_move_time()
+            if self.sensorless_selector == 1:
+                homed = bool(self.gear_endstop.query_endstop(last_move_time))
+            else:
+                homed = bool(self.selector_endstop.query_endstop(last_move_time))
+            self._log_debug("Check #%d of %s_endstop: %s" % (i+1, ("gear" if self.sensorless_selector == 1 else "selector"), homed))
+            if homed:
+                break
+            self.toolhead.dwell(0.1)
+        return homed
 
     def _move_selector_sensorless(self, target):
         successful, travel = self._attempt_selector_move(target)
@@ -1665,7 +1844,7 @@ class Ercf:
         init_position = self.selector_stepper.get_position()[0]
         init_mcu_pos = self.selector_stepper.steppers[0].get_mcu_position()
         target_move = target - init_position
-        self._selector_stepper_move_wait(target, homing_move=2)  # Home sensing move
+        self._selector_stepper_move_wait(target, homing_move=1)
         mcu_position = self.selector_stepper.steppers[0].get_mcu_position()
         travel = (mcu_position - init_mcu_pos) * selector_steps
         delta = abs(target_move - travel)
@@ -1718,13 +1897,16 @@ class Ercf:
         self._set_tool_selected(self.TOOL_UNKNOWN, silent=True)
 
     def _select_tool(self, tool):
-        if tool == self.tool_selected: return
         if tool < 0 or tool >= len(self.selector_offsets):
             self._log_always("Tool %d does not exist" % tool)
             return
 
-        self._log_debug("Selecting tool T%d on gate #%d..." % (tool, self._tool_to_gate(tool)))
-        self._select_gate(self._tool_to_gate(tool))
+        gate = self._tool_to_gate(tool)
+        if tool == self.tool_selected and gate == self.gate_selected:
+            return
+
+        self._log_debug("Selecting tool T%d on gate #%d..." % (tool, gate))
+        self._select_gate(gate)
         self._set_tool_selected(tool, silent=True)
         self._log_info("Tool T%d enabled" % tool)
 
@@ -1735,6 +1917,7 @@ class Ercf:
             self._move_selector_sensorless(offset)
         else:
             self._selector_stepper_move_wait(offset)
+        self.gate_selected = gate
 
     def _select_bypass(self):
         if self.tool_selected == self.TOOL_BYPASS: return
@@ -1758,7 +1941,6 @@ class Ercf:
                 self.gate_selected = self.GATE_UNKNOWN
                 self._set_steps(1.)
             else:
-                self.gate_selected = self._tool_to_gate(tool)
                 self._set_steps(self._get_gate_ratio(self.gate_selected))
             if not silent:
                 self._display_visual_state()
@@ -1787,6 +1969,7 @@ class Ercf:
     cmd_ERCF_HOME_help = "Home the ERCF"
     def cmd_ERCF_HOME(self, gcmd):
         tool = gcmd.get_int('TOOL', 0, minval=0, maxval=len(self.selector_offsets)-1)
+
         try:
             self._home(tool)
         except ErcfError as ee:
@@ -1811,6 +1994,7 @@ class Ercf:
         standalone = gcmd.get_int('STANDALONE', 0, minval=0, maxval=1)
         in_print = self._is_in_print() and (standalone == 0)
         if in_print and self.need_to_recover_state:
+            self._log_debug("Unknown filament postion, recovering state...")
             self._recover_loaded_state()
         try:
             self._change_tool(tool, in_print)
@@ -2030,7 +2214,7 @@ class Ercf:
 # RUNOUT, ENDLESS SPOOL and GATE HANDLING #
 ###########################################
 
-    def _handle_runout(self):
+    def _handle_runout(self, force_runout):
         if self._check_is_paused(): return
         if self.tool_selected < 0:
             raise ErcfError("Filament runout or movement issue on an unknown or bypass tool - manual intervention is required")
@@ -2044,14 +2228,12 @@ class Ercf:
         self._servo_down()
         found = self._buzz_gear_motor()
         self._servo_up()
-        if found:
+        if found and not force_runout:
             raise ErcfError("A clog has been detected and requires manual intervention")
 
         # We have a filament runout
         self._log_always("A runout has been detected")
         if self.enable_endless_spool:
-            # Need to capture PA just in case user's tip forming resets it
-            initial_pa = self.printer.lookup_object("extruder").get_status(0)['pressure_advance']
             group = self.endless_spool_groups[self.tool_selected]
             self._log_info("EndlessSpool checking for additional spools in group %d..." % group)
             num_tools = len(self.selector_offsets)
@@ -2071,20 +2253,19 @@ class Ercf:
                 raise ErcfError("No more available EndlessSpool spools available")
             self._log_info("Remapping T%d to gate #%d" % (self.tool_selected, next_gate))
 
-            self.gcode.run_script_from_command("SAVE_GCODE_STATE NAME=ERCF_PRE_UNLOAD")
+            self.gcode.run_script_from_command("SAVE_GCODE_STATE NAME=ERCF_endless_spool")
             self.gcode.run_script_from_command("_ERCF_ENDLESS_SPOOL_PRE_UNLOAD")
+            self.toolhead.wait_moves()
             if not self._form_tip_standalone():
-                self._log_debug("Didn't detect filamanet during tip forming move!")
+                self._log_info("Didn't detect filament during tip forming move!")
             self._unload_tool(in_print=True)
             self._remap_tool(self.tool_selected, next_gate, 1)
-            self.gate_selected = next_gate
-            self._select_and_load_tool(tool)
-            self.gcode.run_script_from_command("SET_PRESSURE_ADVANCE ADVANCE=%.6f" % initial_pa)
+            self._select_and_load_tool(self.tool_selected)
             self.gcode.run_script_from_command("_ERCF_ENDLESS_SPOOL_POST_LOAD")
-            self.gcode.run_script_from_command("RESTORE_GCODE_STATE NAME=ERCF_PRE_UNLOAD")
-            self.gcode.run_script_from_command("RESUME")
-
+            self.toolhead.wait_moves()
+            self.gcode.run_script_from_command("RESTORE_GCODE_STATE NAME=ERCF_endless_spool")
             self._enable_encoder_sensor()
+            # Continue printing...
         else:
             raise ErcfError("EndlessSpool mode is off - manual intervention is required")
 
@@ -2131,8 +2312,9 @@ class Ercf:
 
     cmd_ERCF_ENCODER_RUNOUT_help = "Encoder runout handler"
     def cmd_ERCF_ENCODER_RUNOUT(self, gcmd):
+        force_runout = bool(gcmd.get_int('RUNOUT', 0, minval=0, maxval=1))
         try:
-            self._handle_runout()
+            self._handle_runout(force_runout)
         except ErcfError as ee:
             self._pause(str(ee))
 
@@ -2180,7 +2362,12 @@ class Ercf:
             except ErcfError as ee:
                 self._log_info("Gate #%d - filament not detected. Marked empty" % i)
                 self.gate_status[i] = self.GATE_EMPTY
-        self._select_tool(0)
+
+        try:
+            self._select_tool(0)
+        except ErcfError as ee:
+            self._log_always("Failure selecting tool 0: %s" % str(ee))
+
         self._log_info(self._tool_to_gate_map_to_human_string())
 
     cmd_ERCF_PRELOAD_help = "Preloads filament at specified or current gate"

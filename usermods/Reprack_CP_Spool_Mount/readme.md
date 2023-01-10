@@ -14,7 +14,9 @@ Carrot Patch spool mounting bracket for the [RepRack filament holder](https://ww
 # Version
 * Version for non-covered tube: [Regular Version](RepRackErcfMount.stl)
 * Version for Slip Rod Covered tube: [Slip Rod Compatible Version](RepRackErctMount_SlipRod.stl)
-
+* Version allowing ERCP upside down, and also to support the ERCF on top [BigDaddyV Version](ERCF_Reprack_Mount_-_BigDaddyV_mod)
+  
 # Credit
 * Regular Version: Designed in Fusion 360 by Danny Quist Discord: chamcham#6574
+* BigDaddyV Version by BigDaddyV on VoronDesign Dicord Server
 * [Slip Rod](https://www.printables.com/fr/model/135700-slip-rod-cover-for-reprack-and-repbox) compatible version: modified in ThinkerCAD by Flisher on Discord

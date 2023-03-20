@@ -5,16 +5,13 @@ Welcome to the Sturdy Rabbit Project Github page!
 
 This project builds upon the Enraged Rabbit Project, which aimed to bring multimaterial capabilities to 3D printers using a single Direct Drive toolhead. In this project, an effort has been made to improve the repeability, robustness and reliability of the ERCF.
 
-< image of the new ERCF >
+<img width="800" alt="Screen Shot 2022-06-23 at 6 24 17 PM" src="https://user-images.githubusercontent.com/12782053/226226559-092b9676-5ea6-4a88-99c5-af5e44d0df45.jpeg">
 
 ## Table of Content
 - [Changelog](#changelog)
 - [Details](#details)
 - [BOM](#bom)
 - [Acknowledgements](#acknowledgements)
-- [FAQ](https://github.com/EtteGit/EnragedRabbitProject/tree/main/Documentation/FAQ)
-  - [Carrot Patch](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Documentation/FAQ/FAQ_ERCP.md)
-  - [Carrot Feeder](https://github.com/EtteGit/EnragedRabbitProject/blob/main/Documentation/FAQ/FAQ_ERCF.md)
  
 
 ## Motivation

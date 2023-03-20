@@ -1,5 +1,5 @@
 
-# StudyBunnyProject
+# SturdyBunnyProject
 
 Welcome to the Sturdy Rabbit Project Github page!
 

@@ -11,15 +11,18 @@ Update the following table with the information about your mod:
 
 like so:
 `
-| Creator | [Mod title](link) | Description | :x: | :x: |`
+| Creator | [Mod title](link) | Description | :heavy_check_mark: | :x: |`
 
 
 | Creator | Mod title | Description | Feeder | Patch |
 | --- | --- | --- | --- | --- |
+| joey2point | [4L Filament Buffer](./4L_Filament_Buffer) | Filament Buffer Drybox | :x: | :heavy_check_mark: |
 | TheWarolf | [AB Toolhead Sensor](./AB_Toolhead_Sensor) | Makes the standard AB clockwork "smart" by inserting filament sensors in the toolhead. Uses microswitch + 7mm steel ball combo. | :heavy_check_mark: | :x: |
 | Tircown | [Bearing_Block_Passthrough](./Bearing_Block_Passthrough) | Allows to do tests or add a temporary spool without taking apart the full setup while still benefit from the sensors of ERCF. | :heavy_check_mark: | :x: |
+| GarthSnyder | [CW2 with ECAS and Sensor](./CW2_with_ECAS_and_optional_sensor) | Modded CW2 with ECAS and optional sensor | :heavy_check_mark: | :x: |
+| Creator? | [Carrot Patch ESUN 2.5kg](./Carrot_Patch_ESUN_2.5kg) | Heavy Carrot Patch for 2.5kg Spool | :x: | :heavy_check_mark: |
 | EtteGit | [Closed_Exhaust_Plate](./Closed_Exhaust_Plate) | Replaces the nominal V2 exhaust parts with a close, sealed plate. | :x: | :x: |
-| TheBelin | [EasyPatchLoader](./EasyPatchLoader) | Makes it easier to load Carrot Patch. | :x: | ✔️ |
+| TheBelin | [EasyPatchLoader](./EasyPatchLoader) | Makes it easier to load Carrot Patch. | :x: | :heavy_check_mark: |
 | Drachenkaetzchen | [Extrusion Mounting Brackets](./Extrusion_Mounting_Brackets) | Extrusion mounting brackets to pre-assemble the ERCF and/or the ERCPs | :heavy_check_mark: | :heavy_check_mark: |
 | Tobi0892 | [IKEA Drybox Carrot Patch](./IKEA_Drybox_Carrot_Patch) | Puts the Carrot Patch into a sealed 10.6l IKEA 365+ box to maintain ~10% humidity. | :x: | :heavy_check_mark: |
 | fsironman | [JST-SM-Connectors](./JST-SM-Connectors) | Modifies the M4 Arm to use JST-SM instead of microfit connectors | :heavy_check_mark: | :x: |

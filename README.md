@@ -73,5 +73,6 @@ Some beta testers would be greatly appreciated, which would allow this project t
  
 ## Acknowledgements
 
-Thanks to the original designer, Ette, for developing the ERCF in the first place.
+- Thanks to the original designer, Ette, for developing the ERCF in the first place.
+- @jmack89427, for beta testing and trying out different filament block support methods
 

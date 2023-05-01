@@ -1,4 +1,17 @@
-# Study Bunny Notes
+# Study Bunny Assembly Notes
+
+## Assembly
+
+The installation is generally the same as the standard ERCF - refer to the manual there. Proper instructions will come soon...
+
+### 2020 Extrusion Length
+
+The 2020 extrusion length is calculated by:
+
+extrusion length [mm] = 45 + 21 * filament_blocks + 26 * filament_blocks_bearing
+
+The length doesn't have to be perfect, there is some "wiggle room".
+
 ## What to print
 
 ### Filament Blocks

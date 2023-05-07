@@ -1,5 +1,17 @@
 # Study Bunny Assembly Notes
 
+## Sturdy Bunny V1
+
+This section will focus on the major changes to the base ERCF components. Further changes can be found here.
+
+The gearbox, hinge and filament blocks now mount directly onto a 2020 extrusion. This greatly improves the overall accuracy and robustness of the assembly.
+
+<img width="800" alt="Screen Shot 2022-06-23 at 6 24 17 PM" src="https://user-images.githubusercontent.com/12782053/226225720-cfacdb08-269f-4be1-810b-a93ab9154093.png">
+
+Filament support blocks have been removed and replaced with filament blocks with an integrated bearing.
+
+<img height="400" alt="Screen Shot 2022-06-23 at 6 24 17 PM" src="https://user-images.githubusercontent.com/12782053/226225330-064feb2d-c447-4527-8a9c-337875b22342.png"> <img height="400" alt="Screen Shot 2022-06-23 at 6 24 17 PM" src="https://user-images.githubusercontent.com/12782053/226225318-3eb1578d-2ed4-42f6-931a-641c32d659ee.png">
+
 ## Assembly
 
 The installation is generally the same as the standard ERCF - refer to the manual there. Proper instructions will come soon...

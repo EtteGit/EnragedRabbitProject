@@ -1,37 +1,49 @@
-# ERCF V1.1 Patch Note (non exhaustive)
-This is a major update. If you already have a, ERCF V1.0, please reprint all the parts for V1.1. Feet anchoring points are unchanged.
+# Study Bunny Assembly Notes
 
-## Hardware:
-### Filament Blocks:
-- Updated filament path to limit unselected filament being pulled or pushed by the rotating gear. The grip on the filament is also drastically improved
-- Fixed the ECAS insert slot
-- Removed the threaded insert version as the direct plastic tapping was sufficient
-- New and improved number tag plate (easy to install and remove, much more robust than before)
-- Added magnetic gates at the exit of each filament block : using a M3 Steel washer and magnets, the filament path of each filament block will be closed at the filament block exit when the selector is not in front of it, ensuring that no unselected filament can stick out and block the selector cart during a tool change
-### Top Hats :
-- Redesign of the Top Hat arm to avoid it's ejection when opening the filament block latch
-- Top Hat Lockers are now easier to print (more contact area with the print surface)
-- New slide-in mechanism for the Top Hat Lockers
-- Top Hat Locker will no longer touch the Filament Block Latch, which is no only touching the Top Hat
-- BMG gear can no longer be installed in the wrong orientation in the Top Hat
-- Moved the servo pressure point on the Top Arm Locker to have a better grip on filament
-### Gear Box :
-- Gear motor is now a low rotor inertia NEMA 14, allowing a smaller footprint, quieter operation and faster loads and unloads (NEMA 17 motors are still 100% compatible)
-- Added a bearing on the Gear Box Back to better constrain the 5mm D-Cut shaft and remove potential longitudinal play
-- Motor Arm infamous overhang is now easy to print
-- Added a customisable, multicolor logo on the front, which is easy to change
-- Minor fixes (micro switch lever colliding with 3D printed part, more plastic matter behind the left side latch threaded inserts...)
-### Bearing Blocks :
-- Added foot to improve global stiffness, especially for long units. It can be install and removed easily without dismounting the unit
-### Selector Motor Support :
-- Fixed the 8mm rod hole issue (same for the Idler Block)
-- Fixed the selector motor screws issue
-### Selector Cart :
-- Old filament sensor is gone. Now there is an amazing encoder, idea and design by @Tircown! Encoder fits in the ERCF selector cart, has a 1.3mm resolution and can keep up with very fast movement (20cm/s +). Allows to precisely track filament load and unload, potential clogs during a print and is also used as filament runout sensor
-- New servo ref. Easier to source, quieter and much cheaper than V1.0 model, works well with the new Top Hat Locker and - Filament Blocks design. V1.0 servo model is still 100% compatible
-- Mystery stuff hidden behind the new selector cart door, can you guess what it is from the charade hidden in the ERCF?
+## Sturdy Bunny V1
 
-## Software:
-To use the new selector encoder, part of the software have to be done in the python part of Klipper. The ERCF V1.1 software will now include a .py file and the usual cfg files. The GCODE macros are still in use, but are much smaller.
+This section will focus on the major changes to the base ERCF components. Further changes can be found here.
 
-Regular update and improvements will be done on the software side, as using the python part of Klipper allows for much more complex and fancy stuff to be done.
+The gearbox, hinge and filament blocks now mount directly onto a 2020 extrusion. This greatly improves the overall accuracy and robustness of the assembly.
+
+<img width="800" alt="Screen Shot 2022-06-23 at 6 24 17 PM" src="https://user-images.githubusercontent.com/12782053/226225720-cfacdb08-269f-4be1-810b-a93ab9154093.png">
+
+Filament support blocks have been removed and replaced with filament blocks with an integrated bearing.
+
+<img height="400" alt="Screen Shot 2022-06-23 at 6 24 17 PM" src="https://user-images.githubusercontent.com/12782053/226225330-064feb2d-c447-4527-8a9c-337875b22342.png"> <img height="400" alt="Screen Shot 2022-06-23 at 6 24 17 PM" src="https://user-images.githubusercontent.com/12782053/226225318-3eb1578d-2ed4-42f6-931a-641c32d659ee.png">
+
+## Assembly
+
+The installation is generally the same as the standard ERCF - refer to the manual there. Proper instructions will come soon...
+
+### 2020 Extrusion Length
+
+The 2020 extrusion length is calculated by:
+
+extrusion length [mm] = 45 + 21 * filament_blocks + 26 * filament_blocks_bearing
+
+The length doesn't have to be perfect, there is some "wiggle room".
+
+## What to print
+
+### Filament Blocks
+
+- **"FILAMENT_BLOCK_BEARING_V1A.stl"** QTY = floor((n+1)/3) = b. (For n = 9, QTY = 3)
+- **"FILAMENT_BLOCK_V1A.stl"** QTY = n - b. (For n = 9, QTY = 6)
+
+Where n is the number of ERCF filament tracks.
+
+You should only need to print the "Top_Hat_Locker_1_xN.stl". Please contact me and let me know if this is not the case, and you have to use the higher pressure top hat lockers.
+
+### Supports
+
+This mod uses the same mounting interface as the standard ERCF, so existing ERCF mounting/support solutions will remain compatible.
+
+### EASY BRD
+
+A modified bracket for the EASY BRD has been included in the STL folder of this project, called "[a]ERCF_EASY_BRD_BRACKET_V1A.stl"
+
+### Other
+
+For ease of cable management, I recommend attaching some cable management clips to the 2020 extrusion. I use [this design](https://www.printables.com/model/6593-2020-extrusion-zip-tie-clip).
+

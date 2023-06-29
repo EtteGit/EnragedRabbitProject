@@ -1,7 +1,7 @@
 
 # Carrot Patch MultiMOD
 [Link to repo](https://github.com/kolbenhans/EnragedRabbitProject)
-![Carrot_Patch_MultiMOD Assembly](Images/CAD_look.PNG)
+![Carrot_Patch_MultiMOD Assembly](images/CAD_look.PNG)
 
 ## BOM
 - Besides the printed parts you need of course the:

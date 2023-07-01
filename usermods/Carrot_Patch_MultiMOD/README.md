@@ -1,6 +1,6 @@
 
 # Carrot Patch MultiMOD
-[Link to repo](https://github.com/kolbenhans/EnragedRabbitProject)
+[Link to repo](https://github.com/kolbenhans/EnragedRabbitProject/tree/main/usermods/Carrot_Patch_MultiMOD)
 ![Carrot_Patch_MultiMOD Assembly](images/CAD_look.png)
 
 ## BOM

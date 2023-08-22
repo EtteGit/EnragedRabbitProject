@@ -1,3 +1,8 @@
+## Change log
+
+- 2022/09/16 - Initial version based on post-RC1 CW2 CAD files
+- 2023/08/22 - Updated to current CW2 geometry (stronger latch)
+
 ## Clockwork 2 with ECAS fitting, with or without ball bearing filament sensor
 
 This version of the Clockwork 2 extruder adds an ECAS fitting to the filament
@@ -10,23 +15,19 @@ Optionally, you can print a version that includes provisions for a mechanical fi
 sensor that uses a ball bearing and microswitch. See below.
 
 The basis for these designs is the VoronDesign/Voron-Stealthburner project on GitHub as
-of August 18, 2022, git commit b2cf2c2. Here are a
-[link to that commit](https://github.com/VoronDesign/Voron-Stealthburner/tree/b2cf2c2c0436d734181688ae3019b9dffb835b8b) 
+of August 22, 2023, git commit 1bccf05. Here are a
+[link to that commit](https://github.com/VoronDesign/Voron-Stealthburner/tree/1bccf0543f40741243d81505c4ad5406eb822715) 
 and a [link to the current version](https://github.com/VoronDesign/Voron-Stealthburner) 
 of the Voron-Stealthburner project.
 
-The version of Voron-Stealthburner on which this mod is based postdates RC1. 
-Both the CW2 main body and the 
-latch have been updated relative to the RC1 release of Voron-Stealthburner.
-However, RC1 versions of other parts **are** compatible with this main body and latch.
-
-The parts in this mod **are not** compatible with pre-RC1 versions of the Clockwork 2.
-Please see the pinned mod in the Discord #ercf_questions channel if that's the CW2
-you want to modify.
+The version of Voron-Stealthburner on which this mod is based primarily updates the 
+latch body relative to the RC1-era versions. None of the previous versions of this mod are 
+compatible with the current CW2; you will need to reprint both the main body 
+and the latch itself if you are updating your CW2.
 
 ## ECAS-only (no filament sensor)
 
-For the ECAS-only version, you just need to print the main body
+For the ECAS-only version, you need to print the main body
 and the latch. The rest of the parts are identical to the standard CW2.
 
 Press-fit the ECAS into its dedicated hole as described in the ERCF documentation. Done!
@@ -133,11 +134,10 @@ to activate the switch.
 *out of* the filament path. This *reduces* friction, makes it *easier* to insert filament, 
 and makes it *harder* for filament to reliably activate the switch.
 
-I don't yet have data on other people's experience with this filament sensor design.
+I don't have much data on other people's experience with this filament sensor design.
 My hope is that the standard configuration will cover nearly all cases, but 
-filaments and tuning
-vary. The loose and tight versions are just there to give you a backup plan. Stick 
-with the standard version unless you're encountering specific issues.
+filaments and tuning vary. The loose and tight versions are just there to give you a
+backup plan. Stick with the standard version unless you're encountering specific issues.
 
 ## Bug reports and suggestions
 

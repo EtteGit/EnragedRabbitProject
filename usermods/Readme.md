@@ -33,3 +33,4 @@ like so:
 | str1pes | [MagFeet](./MagFeet) | Easy mounting/removal for 2020 extrusions | :x: | :heavy_check_mark: |
 | joey2point0 | [4L_Filament_Buffer](./4L_Filament_Buffer) | Utilizes 4L cereal box container to make a sealed filament buffer. | :x: | :heavy_check_mark: |
 | ~MHz | [Orbiter_V1.5_V2_on_AB](./Orbiter_V1.5_V2_on_AB) | Yet Additional Orbiter v1.5 Mechanical and Inductive Extruder to Toolhead adapter and a WIP Orbiter v2 Inductive Extruder to Toolhead adapter  | :heavy_check_mark: | :x: |
+| kolbenhans | [Carrot_Patch_MultiMOD](./Carrot_Patch_MultiMOD) | filament holder removed and merged to a 6x Multibuffer | :x: | :heavy_check_mark: |

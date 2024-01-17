@@ -1,3 +1,8 @@
+# Outdated
+
+Hey there, this project is going to be developed by all of us, the fantastic 3D printing community! :)
+
+V2 is developed here: https://github.com/Enraged-Rabbit-Community/ERCF_v2
 
 # EnragedRabbitProject
 
